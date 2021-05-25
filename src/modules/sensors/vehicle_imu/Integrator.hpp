@@ -45,6 +45,8 @@
 #include <mathlib/mathlib.h>
 #include <matrix/math.hpp>
 
+#include <drivers/drv_hrt.h>
+
 class Integrator
 {
 public:
@@ -58,21 +60,40 @@ public:
 	 * @param val		Item to put.
 	 * @return		true if data was accepted and integrated.
 	 */
-	bool put(const uint64_t &timestamp, const matrix::Vector3f &val);
-
-	/**
-	 * Put an item into the integral.
-	 *
-	 * @param timestamp	Timestamp of the current value.
-	 * @param val		Item to put.
-	 * @param integral	Current integral in case the integrator did reset, else the value will not be modified
-	 * @param integral_dt	Get the dt in us of the current integration (only if reset).
-	 * @return		true if putting the item triggered an integral reset and the integral should be
-	 *			published.
-	 */
-	bool put(const uint64_t &timestamp, const matrix::Vector3f &val, matrix::Vector3f &integral, uint32_t &integral_dt)
+	bool put(const hrt_abstime &timestamp, const matrix::Vector3f &val)
 	{
-		return put(timestamp, val) && reset(integral, integral_dt);
+		if ((_last_integration_time == 0) || (timestamp <= _last_integration_time)) {
+			/* this is the first item in the integrator */
+			_last_integration_time = timestamp;
+			_last_reset_time = timestamp;
+			_last_val = val;
+
+			return false;
+		}
+
+		// Use trapezoidal integration to calculate the delta integral
+		const float dt = static_cast<float>(timestamp - _last_integration_time) * 1e-6f;
+		const matrix::Vector3f delta_alpha = (val + _last_val) * dt * 0.5f;
+		_last_val = val;
+		_last_integration_time = timestamp;
+		_integrated_samples++;
+
+		// Calculate coning corrections if required
+		if (_coning_comp_on) {
+			// Coning compensation derived by Paul Riseborough and Jonathan Challinger,
+			// following:
+			// Tian et al (2010) Three-loop Integration of GPS and Strapdown INS with Coning and Sculling Compensation
+			// Sourced: http://www.sage.unsw.edu.au/snap/publications/tian_etal2010b.pdf
+			// Simulated: https://github.com/priseborough/InertialNav/blob/master/models/imu_error_modelling.m
+			_beta += ((_last_alpha + _last_delta_alpha * (1.f / 6.f)) % delta_alpha) * 0.5f;
+			_last_delta_alpha = delta_alpha;
+			_last_alpha = _alpha;
+		}
+
+		// accumulate delta integrals
+		_alpha += delta_alpha;
+
+		return true;
 	}
 
 	/**
@@ -102,7 +123,28 @@ public:
 	 * @param integral_dt	Get the dt in us of the current integration.
 	 * @return		true if integral valid
 	 */
-	bool reset(matrix::Vector3f &integral, uint32_t &integral_dt);
+	bool reset(matrix::Vector3f &integral, uint32_t &integral_dt)
+	{
+		if (integral_ready()) {
+			integral = matrix::Vector3f{_alpha};
+			_alpha.zero();
+
+			integral_dt = (_last_integration_time - _last_reset_time);
+			_last_reset_time = _last_integration_time;
+			_integrated_samples = 0;
+
+			// apply coning corrections if required
+			if (_coning_comp_on) {
+				integral += _beta;
+				_beta.zero();
+				_last_alpha.zero();
+			}
+
+			return true;
+		}
+
+		return false;
+	}
 
 private:
 	uint64_t _last_integration_time{0}; /**< timestamp of the last integration step */
