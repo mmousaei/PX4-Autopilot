@@ -430,8 +430,13 @@ void VehicleIMU::UpdateIntegratorConfiguration()
 		const float configured_interval_us = 1e6f / _param_imu_integ_rate.get();
 
 		// determine number of sensor samples that will get closest to the desired integration interval
-		const uint8_t accel_integral_samples = math::max(1.f, roundf(configured_interval_us / _accel_interval_us));
-		const uint8_t gyro_integral_samples = math::max(1.f, roundf(configured_interval_us / _gyro_interval_us));
+		uint8_t accel_integral_samples = math::max(1.f, roundf(configured_interval_us / _accel_interval_us));
+		uint8_t gyro_integral_samples = math::max(1.f, roundf(configured_interval_us / _gyro_interval_us));
+
+		// if gyro samples exceeds queue depth, instead round to nearest even integer to ease scheduling
+		if (gyro_integral_samples > sensor_gyro_s::ORB_QUEUE_LENGTH) {
+			gyro_integral_samples = math::max(1.f, roundf(configured_interval_us / _gyro_interval_us / 2) * 2);
+		}
 
 		// let the gyro set the configuration and scheduling
 		// accel integrator will be forced to reset when gyro integrator is ready
@@ -444,6 +449,10 @@ void VehicleIMU::UpdateIntegratorConfiguration()
 
 		// gyro: find largest integer multiple of gyro_integral_samples
 		for (int n = sensor_gyro_s::ORB_QUEUE_LENGTH; n > 0; n--) {
+			if (gyro_integral_samples > sensor_gyro_s::ORB_QUEUE_LENGTH) {
+				gyro_integral_samples /= 2;
+			}
+
 			if (gyro_integral_samples % n == 0) {
 				_sensor_gyro_sub.set_required_updates(n);
 
