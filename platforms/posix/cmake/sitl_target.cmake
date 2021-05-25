@@ -130,6 +130,7 @@ set(models
 	tailsitter
 	techpod
 	tiltrotor
+	needle
 	typhoon_h480
 	uuv_bluerov2_heavy
 	uuv_hippocampus
