@@ -65,6 +65,7 @@ AngularVelocityController::init()
 		return false;
 	}
 
+	PX4_ERR("Ang vel cont init!!!");
 	return true;
 }
 

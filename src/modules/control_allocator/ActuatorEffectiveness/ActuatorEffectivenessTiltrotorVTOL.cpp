@@ -54,6 +54,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 
 	// Trim
 	float tilt = 0.0f;
+	// PX4_ERR("NUM_AXES: "+string(NUM_AXES));
 
 	switch (_flight_phase) {
 	case FlightPhase::HOVER_FLIGHT:  {

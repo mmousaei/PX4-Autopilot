@@ -57,6 +57,8 @@ px4_add_board(
 		uuv_pos_control
 		vmount
 		vtol_att_control
+		control_allocator
+		angular_velocity_controller
 	SYSTEMCMDS
 		#dumpfile
 		dyn

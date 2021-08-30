@@ -68,6 +68,7 @@ ControlAllocator::~ControlAllocator()
 bool
 ControlAllocator::init()
 {
+	PX4_ERR("cont allo is called!!!");
 	if (!_vehicle_torque_setpoint_sub.registerCallback()) {
 		PX4_ERR("vehicle_torque_setpoint callback registration failed!");
 		return false;
@@ -84,6 +85,7 @@ ControlAllocator::init()
 void
 ControlAllocator::parameters_updated()
 {
+	PX4_ERR("param update");
 	// Allocation method & effectiveness source
 	// Do this first: in case a new method is loaded, it will be configured below
 	update_effectiveness_source();
@@ -137,6 +139,7 @@ ControlAllocator::parameters_updated()
 void
 ControlAllocator::update_allocation_method()
 {
+	PX4_ERR("update all meth");
 	AllocationMethod method = (AllocationMethod)_param_ca_method.get();
 
 	if (_allocation_method_id != method) {
@@ -188,6 +191,7 @@ ControlAllocator::update_allocation_method()
 void
 ControlAllocator::update_effectiveness_source()
 {
+	PX4_ERR("up eff src");
 	EffectivenessSource source = (EffectivenessSource)_param_ca_airframe.get();
 
 	if (_effectiveness_source_id != source) {
@@ -234,6 +238,7 @@ ControlAllocator::update_effectiveness_source()
 void
 ControlAllocator::Run()
 {
+	PX4_ERR("run!!!");
 	if (should_exit()) {
 		_vehicle_torque_setpoint_sub.unregisterCallback();
 		_vehicle_thrust_setpoint_sub.unregisterCallback();
@@ -351,6 +356,7 @@ ControlAllocator::Run()
 void
 ControlAllocator::update_effectiveness_matrix_if_needed()
 {
+	PX4_ERR("up eff mat if needed");
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> effectiveness;
 
 	if (_actuator_effectiveness->getEffectivenessMatrix(effectiveness)) {
@@ -376,6 +382,7 @@ ControlAllocator::update_effectiveness_matrix_if_needed()
 void
 ControlAllocator::publish_actuator_setpoint()
 {
+	PX4_ERR("pub act set");
 	matrix::Vector<float, NUM_ACTUATORS> actuator_sp = _control_allocation->getActuatorSetpoint();
 
 	vehicle_actuator_setpoint_s vehicle_actuator_setpoint{};
