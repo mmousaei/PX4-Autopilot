@@ -160,7 +160,7 @@ bool MixingOutput::updateSubscriptions(bool allow_wq_switch, bool limit_callback
 
 			if (_groups_required & (1 << i)) {
 				if (_control_subs[i].registerCallback()) {
-					PX4_DEBUG("subscribed to actuator_controls_%d", i);
+					PX4_ERR("subscribed to actuator_controls_%d", i);
 
 					if (limit_callbacks_to_primary) {
 						if (i == 0) {
