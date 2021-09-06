@@ -153,6 +153,8 @@ ControlAllocator::update_allocation_method()
 
 		switch (method) {
 		case AllocationMethod::PSEUDO_INVERSE:
+			PX4_ERR("PSEUDO_INVERSE allocation method");
+
 			tmp = new ControlAllocationPseudoInverse();
 			break;
 
@@ -321,8 +323,8 @@ ControlAllocator::Run()
 		_last_run = now;
 
 		update_effectiveness_matrix_if_needed();
-
 		// Set control setpoint vector
+		// Mohammad: NUM_AXES for our vtol = 6!
 		matrix::Vector<float, NUM_AXES> c;
 		c(0) = _torque_sp(0);
 		c(1) = _torque_sp(1);
@@ -361,6 +363,7 @@ ControlAllocator::update_effectiveness_matrix_if_needed()
 		matrix::Vector<float, NUM_ACTUATORS> actuator_min = _control_allocation->getActuatorMin();
 
 		for (size_t j = 0; j < NUM_ACTUATORS; j++) {
+
 			if (actuator_min(j) >= actuator_max(j)) {
 				for (size_t i = 0; i < NUM_AXES; i++) {
 					effectiveness(i, j) = 0.0f;

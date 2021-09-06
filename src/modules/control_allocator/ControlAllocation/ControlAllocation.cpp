@@ -76,6 +76,7 @@ ControlAllocation::setActuatorSetpoint(
 void
 ControlAllocation::clipActuatorSetpoint(matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator) const
 {
+	// Mohammad: num_actuators for our vtol = 10 (probably there's no rudder!)
 	for (int i = 0; i < _num_actuators; i++) {
 		if (_actuator_max(i) < _actuator_min(i)) {
 			actuator(i) = _actuator_trim(i);

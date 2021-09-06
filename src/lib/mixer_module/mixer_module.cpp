@@ -77,6 +77,7 @@ _control_latency_perf(perf_alloc(PC_ELAPSED, "control latency"))
 	uORB::Publication<test_motor_s> test_motor_pub{ORB_ID(test_motor)};
 	test_motor_pub.publish(test);
 	_motor_test.test_motor_sub.subscribe();
+	init_motors = true;
 }
 
 MixingOutput::~MixingOutput()
@@ -443,13 +444,23 @@ void
 MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_outputs_s &actuator_outputs)
 {
 	actuator_outputs.noutputs = num_outputs;
-	
+
 	for (size_t i = 0; i < num_outputs; ++i) {
 		actuator_outputs.output[i] = _current_output_value[i];
+		if(actuator_outputs.output[i] > max_out[i])	max_out[i] = actuator_outputs.output[i];
+		if(actuator_outputs.output[i] < min_out[i])	min_out[i] = actuator_outputs.output[i];
 		if(int(i) == (param_vtol_failure-1)) actuator_outputs.output[i] = 900;
+		// PX4_ERR("max out %d = %f", int(i), double(max_out[i]));
+		// PX4_ERR("min out %d = %f", int(i), double(min_out[i]));
+		// PX4_ERR("out %d = %f", int(i), double(actuator_outputs.output[i]));
+
 		// Failure here
 		// PX4_ERR("param_vtol_failure:\t%d", int(param_vtol_failure));
 	}
+	// actuator_outputs.output[8] = 1500;
+	// actuator_outputs.output[9] = 1500;
+	// actuator_outputs.output[10] = 1500;
+	// actuator_outputs.output[11] = 1500;
 
 	actuator_outputs.timestamp = hrt_absolute_time();
 	_outputs_pub.publish(actuator_outputs);

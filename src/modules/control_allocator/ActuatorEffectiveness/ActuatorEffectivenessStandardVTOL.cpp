@@ -49,6 +49,7 @@ ActuatorEffectivenessStandardVTOL::ActuatorEffectivenessStandardVTOL()
 bool
 ActuatorEffectivenessStandardVTOL::getEffectivenessMatrix(matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &matrix)
 {
+	printf("here in standard vtol effectiveness!!!\n");
 	if (!_updated) {
 		return false;
 	}

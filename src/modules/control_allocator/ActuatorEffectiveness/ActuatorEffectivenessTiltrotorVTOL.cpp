@@ -51,24 +51,26 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	if (!_updated) {
 		return false;
 	}
-
 	// Trim
 	float tilt = 0.0f;
 	// PX4_ERR("NUM_AXES: "+string(NUM_AXES));
 
 	switch (_flight_phase) {
 	case FlightPhase::HOVER_FLIGHT:  {
+			// printf("hover flight mode!\n");
 			tilt = 0.0f;
 			break;
 		}
 
 	case FlightPhase::FORWARD_FLIGHT: {
+			// printf("FF MODE!\n");
 			tilt = 1.5f;
 			break;
 		}
 
 	case FlightPhase::TRANSITION_FF_TO_HF:
 	case FlightPhase::TRANSITION_HF_TO_FF: {
+			// printf("TRANSITION\n");
 			tilt = 1.0f;
 			break;
 		}
@@ -85,6 +87,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	_trim(7) = tilt;
 
 	// Effectiveness
+	// Mohammad: NUM_AXES: 6, NUM_ACTUATORS: 16 for our vtol!!!
 	const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
 		{-0.5f * cosf(_trim(4)),  0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), 0.5f * _trim(0) *sinf(_trim(4)), -0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), -0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
 		{ 0.5f * cosf(_trim(4)), -0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), -0.5f * _trim(0) *sinf(_trim(4)),  0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f},

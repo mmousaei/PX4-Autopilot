@@ -53,6 +53,8 @@ AllocatedActuatorMixer::AllocatedActuatorMixer(ControlCallback control_cb,
 		uint8_t index) :
 	Mixer(control_cb, cb_handle)
 {
+
+
 	if (index < 8) {
 		_control_group = 4;
 		_control_index = index;
@@ -73,6 +75,7 @@ unsigned AllocatedActuatorMixer::set_trim(float trim)
 
 unsigned AllocatedActuatorMixer::get_trim(float *trim)
 {
+
 	*trim = 0.0f;
 	return 1;
 }
@@ -130,10 +133,12 @@ AllocatedActuatorMixer::from_text(Mixer::ControlCallback control_cb, uintptr_t c
 unsigned
 AllocatedActuatorMixer::mix(float *outputs, unsigned space)
 {
+	// debug("run!");
+
 	if (space < 1) {
 		return 0;
 	}
-
+	// printf("allocated output = %f\n", double(*outputs));
 	_control_cb(_cb_handle,
 		    _control_group,
 		    _control_index,

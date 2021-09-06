@@ -277,6 +277,9 @@ private:
 	perf_counter_t _control_latency_perf;
 
 	int param_vtol_failure;
+	bool init_motors;
+	float min_out[12] = {10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0, 10000.0};
+	float max_out[12] = {-10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0, -10000.0};
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::MC_AIRMODE>) _param_mc_airmode,   ///< multicopter air-mode
 		(ParamInt<px4::params::CMU_VTOL_FAILURE>) _param_vtol_failure,   ///< failure to an actuator
