@@ -158,7 +158,6 @@ bool MixingOutput::updateSubscriptions(bool allow_wq_switch, bool limit_callback
 					break;
 				}
 			}
-
 			if (_groups_required & (1 << i)) {
 				if (_control_subs[i].registerCallback()) {
 					PX4_DEBUG("subscribed to actuator_controls_%d", i);
@@ -366,6 +365,12 @@ bool MixingOutput::update()
 			if (_control_subs[i].copy(&_controls[i])) {
 				n_updates++;
 			}
+			// Mohammad: print mixer control
+			// for (int j = 4; j <= 5; ++j) {
+			// 	for (int k = 0; k < 4; ++k) {
+			// 		PX4_ERR("mixer control [%d][%d] = %f\n", j, k, double(_controls[j].control[k]));
+			// 	}
+			// }
 
 			/* During ESC calibration, we overwrite the throttle value. */
 			if (i == 0 && _armed.in_esc_calibration_mode) {
@@ -430,7 +435,11 @@ bool MixingOutput::update()
 	if (_interface.updateOutputs(stop_motors, _current_output_value, mixed_num_outputs, n_updates)) {
 		actuator_outputs_s actuator_outputs{};
 		setAndPublishActuatorOutputs(mixed_num_outputs, actuator_outputs);
-
+		// Mohammad: print actuator outputs to drivers
+		for(int l = 0; l < 13; ++l) {
+			PX4_ERR("act out %d = %f\n", l, double(actuator_outputs.output[l]));
+		}
+		// PX4_ERR("num out %d\n", int(mixed_num_outputs));
 		publishMixerStatus(actuator_outputs);
 		updateLatencyPerfCounter(actuator_outputs);
 	}
@@ -454,7 +463,7 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 		// PX4_ERR("min out %d = %f", int(i), double(min_out[i]));
 		// PX4_ERR("out %d = %f", int(i), double(actuator_outputs.output[i]));
 
-		// Failure here
+		// Mohammad: Failure here
 		// PX4_ERR("param_vtol_failure:\t%d", int(param_vtol_failure));
 	}
 	// actuator_outputs.output[8] = 1500;

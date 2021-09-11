@@ -96,15 +96,30 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 		{ 0.f,  0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
 		{-0.25f * cosf(_trim(4)), -0.25f * cosf(_trim(5)), -0.25f * cosf(_trim(6)), -0.25f * cosf(_trim(7)), 0.25f * _trim(0) *sinf(_trim(4)), 0.25f * _trim(1) *sinf(_trim(5)), 0.25f * _trim(2) *sinf(_trim(6)), 0.25f * _trim(3) *sinf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
 	};
+
+
+	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
+	// 	{ 0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.25f * sinf(_trim(4)), 0.25f * sinf(_trim(5)), 0.25f * sinf(_trim(6)), 0.25f * sinf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.f,  0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{-0.25f * cosf(_trim(4)), -0.25f * cosf(_trim(5)), -0.25f * cosf(_trim(6)), -0.25f * cosf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
+	// };
 	matrix = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS>(tiltrotor_vtol);
 
 	// Temporarily disable a few controls (WIP)
-	for (size_t j = 4; j < 8; j++) {
-		matrix(3, j) = 0.0f;
-		matrix(4, j) = 0.0f;
-		matrix(5, j) = 0.0f;
-	}
-
+	// for (size_t j = 4; j < 8; j++) {
+	// 	matrix(3, j) = 0.0f;
+	// 	matrix(4, j) = 0.0f;
+	// 	matrix(5, j) = 0.0f;
+	// }
+	// for (int i = 0; i < NUM_AXES; ++i) {
+	// 	for (int j; j < NUM_ACTUATORS; ++j) {
+	// 		printf("%f, ", double(matrix(i,j)));
+	// 	}
+	// 	printf("\n");
+	// }
 
 	_updated = false;
 	return true;

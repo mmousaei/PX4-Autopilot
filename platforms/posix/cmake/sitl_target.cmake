@@ -123,6 +123,8 @@ set(models
 	if750a
 	iris
 	iris_ctrlalloc
+	tiltrotor_ctrlalloc
+	needle_ctrlalloc
 	iris_dual_gps
 	iris_foggy_lidar
 	iris_irlock

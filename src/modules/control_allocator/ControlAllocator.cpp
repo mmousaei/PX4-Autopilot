@@ -332,6 +332,12 @@ ControlAllocator::Run()
 		c(3) = _thrust_sp(0);
 		c(4) = _thrust_sp(1);
 		c(5) = _thrust_sp(2);
+		// printf("C0 = %f\n", double(c(0)));
+		// printf("C1 = %f\n", double(c(1)));
+		// printf("C2 = %f\n", double(c(2)));
+		// printf("C3 = %f\n", double(c(3)));
+		// printf("C4 = %f\n", double(c(4)));
+		// printf("C5 = %f\n", double(c(5)));
 		_control_allocation->setControlSetpoint(c);
 
 		// Do allocation
@@ -345,6 +351,8 @@ ControlAllocator::Run()
 		// the current mixer system and multicopter controller
 		// TODO: remove
 		publish_legacy_actuator_controls();
+		// print_status();
+
 	}
 
 	perf_end(_loop_perf);
@@ -385,7 +393,10 @@ ControlAllocator::publish_actuator_setpoint()
 	vehicle_actuator_setpoint.timestamp = hrt_absolute_time();
 	vehicle_actuator_setpoint.timestamp_sample = _timestamp_sample;
 	actuator_sp.copyTo(vehicle_actuator_setpoint.actuator);
-
+	// Mohammad: print published actuator setpoints
+	// for(int i = 0; i < NUM_ACTUATORS; ++i) {
+	// 	printf("actuator setpoint %d = %f\n", i, double(actuator_sp(i)));
+	// }
 	_vehicle_actuator_setpoint_pub.publish(vehicle_actuator_setpoint);
 }
 
@@ -454,8 +465,25 @@ ControlAllocator::publish_legacy_actuator_controls()
 
 	for (size_t i = 0; i < 8; i++) {
 		actuator_controls_4.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i))) ? actuator_sp_normalized(i) : 0.0f;
+		// Mohammad: print actuator control
+		// printf("actuator control %d = %f\n", int(i), double(actuator_controls_4.control[i]));
 		actuator_controls_5.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i + 8))) ? actuator_sp_normalized(i + 8) : 0.0f;
 	}
+	// Mohammad limit motors
+	// actuator_controls_4.control[0] = 0.0f;
+	// actuator_controls_4.control[1] = 0.0f;
+	// actuator_controls_4.control[2] = 0.0f;
+	// actuator_controls_4.control[3] = 0.0f;
+	// actuator_controls_4.control[4] = 1.6f;
+	// actuator_controls_4.control[5] = -1.0f;
+	// actuator_controls_4.control[6] = -1.0f;
+	// actuator_controls_4.control[7] = -1.0f;
+	// actuator_controls_5.control[0] = 1.0f;
+	// actuator_controls_5.control[1] = -2.0f;
+	// actuator_controls_5.control[2] = 2.0f;
+	// actuator_controls_5.control[3] = 1.0f;
+	// actuator_controls_5.control[4] = 1.0f;
+	// actuator_controls_5.control[5] = 1.0f;
 
 	_actuator_controls_4_pub.publish(actuator_controls_4);
 	_actuator_controls_5_pub.publish(actuator_controls_5);
