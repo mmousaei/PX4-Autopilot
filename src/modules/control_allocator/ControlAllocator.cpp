@@ -55,6 +55,7 @@ ControlAllocator::ControlAllocator() :
 	_loop_perf(perf_alloc(PC_ELAPSED, MODULE_NAME": cycle"))
 {
 	parameters_updated();
+	_flag_trans = false;
 }
 
 ControlAllocator::~ControlAllocator()
@@ -142,7 +143,7 @@ ControlAllocator::update_allocation_method()
 	//PX4_ERR("update all meth");
 	AllocationMethod method = (AllocationMethod)_param_ca_method.get();
 
-	if (_allocation_method_id != method) {
+	//if (_allocation_method_id != method) {
 
 		// Save current state
 		matrix::Vector<float, NUM_ACTUATORS> actuator_sp;
@@ -185,7 +186,7 @@ ControlAllocator::update_allocation_method()
 			// Configure new allocation method
 			_control_allocation->setActuatorSetpoint(actuator_sp);
 		}
-	}
+	//}
 }
 
 void
@@ -194,7 +195,7 @@ ControlAllocator::update_effectiveness_source()
 	//PX4_ERR("up eff src");
 	EffectivenessSource source = (EffectivenessSource)_param_ca_airframe.get();
 
-	if (_effectiveness_source_id != source) {
+	//if (_effectiveness_source_id != source) {
 
 		// try to instanciate new effectiveness source
 		ActuatorEffectiveness *tmp = nullptr;
@@ -232,7 +233,7 @@ ControlAllocator::update_effectiveness_source()
 			// Save source id
 			_effectiveness_source_id = source;
 		}
-	}
+	//}
 }
 
 void
@@ -274,19 +275,29 @@ ControlAllocator::Run()
 
 		// Check if the current flight phase is HOVER or FIXED_WING
 		if (vehicle_status.vehicle_type == vehicle_status_s::VEHICLE_TYPE_ROTARY_WING) {
+			_flag_trans = false;
 			flight_phase = ActuatorEffectiveness::FlightPhase::HOVER_FLIGHT;
+			//PX4_ERR("Current flight phase = hover flight");
+			//print_status();
 
 		} else {
 			flight_phase = ActuatorEffectiveness::FlightPhase::FORWARD_FLIGHT;
+			PX4_INFO("Current flight phase = forward flight");
+			//print_status();
 		}
 
 		// Special cases for VTOL in transition
 		if (vehicle_status.is_vtol && vehicle_status.in_transition_mode) {
+			_flag_trans = true;
 			if (vehicle_status.in_transition_to_fw) {
 				flight_phase = ActuatorEffectiveness::FlightPhase::TRANSITION_HF_TO_FF;
+				PX4_INFO("Current flight phase = hf to ff");
+				//print_status();
 
 			} else {
 				flight_phase = ActuatorEffectiveness::FlightPhase::TRANSITION_FF_TO_HF;
+				//PX4_ERR("Current flight phase = ff to hf");
+				//print_status();
 			}
 		}
 
@@ -335,6 +346,11 @@ ControlAllocator::Run()
 		c(3) = _thrust_sp(0);
 		c(4) = _thrust_sp(1);
 		c(5) = _thrust_sp(2);
+		// if (_flag_trans) {
+		// 	for(size_t k = 0; k < 6; k++){
+		// 		PX4_INFO("wrench %zu = %f", k, double(c(k)));}
+		// 		}
+
 		_control_allocation->setControlSetpoint(c);
 
 		// Do allocation
@@ -431,9 +447,12 @@ ControlAllocator::publish_control_allocator_status()
 	for (size_t i = 0; i < NUM_ACTUATORS; i++) {
 		if (actuator_sp(i) > (actuator_max(i) - FLT_EPSILON)) {
 			control_allocator_status.actuator_saturation[i] = control_allocator_status_s::ACTUATOR_SATURATION_UPPER;
+			//PX4_ERR("Actuator %zu = %d.%.6d saturated upper",  i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i))*1000000));
 
 		} else if (actuator_sp(i) < (actuator_min(i) + FLT_EPSILON)) {
 			control_allocator_status.actuator_saturation[i] = control_allocator_status_s::ACTUATOR_SATURATION_LOWER;
+
+			//PX4_ERR("Actuator %zu = %d.%.6d saturated lower",  i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i))*1000000));
 		}
 	}
 
@@ -459,6 +478,13 @@ ControlAllocator::publish_legacy_actuator_controls()
 	for (size_t i = 0; i < 8; i++) {
 		actuator_controls_4.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i))) ? actuator_sp_normalized(i) : 0.0f;
 		actuator_controls_5.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i + 8))) ? actuator_sp_normalized(i + 8) : 0.0f;
+		if (i == 4 && _flag_trans){
+			//actuator_controls_4.control[4] = 0.35f;
+			//PX4_INFO("Allocated actuator group 4  %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i) - (int)actuator_sp(i))*1000000));
+			//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i)*1000000));
+			//PX4_ERR("Allocated actuator group 4 %zu = %d.%.6d normalized", i, (int)actuator_controls_4.control[i], (int)((actuator_controls_4.control[i]-(int)actuator_controls_4.control[i])*1000000));
+		}
+		//PX4_ERR("Allocated actuator group 5 %zu = %d.%.6d", i, (int)actuator_controls_5.control[i], (int)((actuator_controls_5.control[i]-(int)actuator_controls_5.control[i])*1000000));
 	}
 
 	_actuator_controls_4_pub.publish(actuator_controls_4);

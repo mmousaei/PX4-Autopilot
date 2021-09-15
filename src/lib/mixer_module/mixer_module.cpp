@@ -362,6 +362,7 @@ bool MixingOutput::update()
 	/* get controls for required topics */
 	for (unsigned i = 0; i < actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS; i++) {
 		if (_groups_subscribed & (1 << i)) {
+			//PX4_INFO("actuator_outputs %u", i);
 			if (_control_subs[i].copy(&_controls[i])) {
 				n_updates++;
 			}
@@ -446,6 +447,7 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 
 	for (size_t i = 0; i < num_outputs; ++i) {
 		actuator_outputs.output[i] = _current_output_value[i];
+		//PX4_ERR("= %u\n",_current_output_value[i]);
 	}
 
 	actuator_outputs.timestamp = hrt_absolute_time();

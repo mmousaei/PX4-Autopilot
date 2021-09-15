@@ -176,6 +176,7 @@ AngularVelocityController::Run()
 
 			// Scale _thrust_sp in Newton, assuming _hover_thrust is equivalent to 1G
 			_thrust_sp *= (_param_vm_mass.get() * CONSTANTS_ONE_G / _hover_thrust);
+			PX4_INFO("_thrust_sp x= %f, y=%f, z=%f", double(_thrust_sp(0)), double(_thrust_sp(1)), double(_thrust_sp(2)));
 		}
 
 		// run the controller

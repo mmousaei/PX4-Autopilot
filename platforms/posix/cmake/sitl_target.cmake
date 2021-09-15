@@ -143,9 +143,11 @@ set(models
 	solo
 	standard_vtol
 	standard_vtol_drop
+	standard_vtol_ctrlalloc
 	tailsitter
 	techpod
 	tiltrotor
+	tiltrotor_ctrlalloc
 	needle
 	typhoon_h480
 	typhoon_ctrlalloc

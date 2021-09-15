@@ -1,0 +1,115 @@
+#!/bin/sh
+#
+# @name VTOL Tiltrotor
+#
+# @type VTOL Tiltrotor
+#
+
+. ${R}etc/init.d/rc.vtol_defaults
+. ${R}etc/init.d/rc.ctrlalloc
+
+param set-default MPC_USE_HTE 0
+
+param set-default IMU_GYRO_RATEMAX 800
+
+param set-default FW_L1_PERIOD 12
+param set-default FW_MAN_P_MAX 30
+param set-default FW_PR_FF 0.2
+param set-default FW_PR_I 0.4
+param set-default FW_PR_P 0.9
+param set-default FW_PSP_OFF 2
+param set-default FW_P_LIM_MAX 32
+param set-default FW_P_LIM_MIN -15
+param set-default FW_RR_FF 0.1
+param set-default FW_RR_P 0.3
+param set-default FW_THR_CRUISE 0.38
+param set-default FW_THR_MAX 0.6
+param set-default FW_THR_MIN 0.05
+param set-default FW_T_ALT_TC 2
+param set-default FW_T_CLMB_MAX 8
+param set-default FW_T_HRATE_FF 0.5
+param set-default FW_T_SINK_MAX 2.7
+param set-default FW_T_SINK_MIN 2.2
+param set-default FW_T_TAS_TC 2
+
+param set-default MC_YAW_P 1.6
+
+param set-default MIS_TAKEOFF_ALT 10
+
+param set-default MPC_ACC_HOR_MAX 2
+param set-default MPC_XY_P 0.5
+param set-default MPC_XY_VEL_P_ACC 3
+param set-default MPC_XY_VEL_I_ACC 4
+param set-default MPC_XY_VEL_D_ACC 0.1
+param set-default MPC_Z_P 0.5
+param set-default MPC_Z_VEL_P_ACC 2
+param set-default MPC_THR_HOVER 0.15
+
+param set-default NAV_LOITER_RAD 80
+
+param set-default VT_B_TRANS_DUR 8
+param set-default VT_FWD_THRUST_EN 4
+param set-default VT_MOT_ID 1234
+param set-default VT_TILT_TRANS 0.6
+param set-default VT_TYPE 1
+
+
+param set-default VM_MASS 1.5
+param set-default VM_INERTIA_XX 0.03
+param set-default VM_INERTIA_YY 0.03
+param set-default VM_INERTIA_ZZ 0.05
+
+param set-default CA_AIRFRAME 2
+param set-default CA_METHOD 1
+# rotors
+param set-default CA_ACT0_MIN 0
+param set-default CA_ACT1_MIN 0
+param set-default CA_ACT2_MIN 0
+param set-default CA_ACT3_MIN 0
+
+param set-default CA_ACT0_MAX 1
+param set-default CA_ACT1_MAX 1
+param set-default CA_ACT2_MAX 1
+param set-default CA_ACT3_MAX 1
+# tilts
+param set-default CA_ACT4_MIN -0.1
+param set-default CA_ACT5_MIN -0.1
+param set-default CA_ACT6_MIN -0.1
+param set-default CA_ACT7_MIN -0.1
+
+param set-default CA_ACT4_MAX 1.5
+param set-default CA_ACT5_MAX 1.5
+param set-default CA_ACT6_MAX 1.5
+param set-default CA_ACT7_MAX 1.5
+# ailerons
+param set-default CA_ACT8_MIN -2.0
+param set-default CA_ACT9_MIN -2.0
+param set-default CA_ACT8_MAX 2.0
+param set-default CA_ACT9_MAX 2.0
+# elevator
+param set-default CA_ACT10_MIN 1.6
+
+param set-default CA_ACT10_MAX 1.7
+
+param set-default CA_MC_R0_PX 0.1515
+param set-default CA_MC_R0_PY 0.245
+param set-default CA_MC_R0_CT 6.5
+param set-default CA_MC_R0_KM 0.05
+param set-default CA_MC_R1_PX -0.1515
+param set-default CA_MC_R1_PY -0.1875
+param set-default CA_MC_R1_CT 6.5
+param set-default CA_MC_R1_KM 0.05
+param set-default CA_MC_R2_PX 0.1515
+param set-default CA_MC_R2_PY -0.245
+param set-default CA_MC_R2_CT 6.5
+param set-default CA_MC_R2_KM -0.05
+param set-default CA_MC_R3_PX -0.1515
+param set-default CA_MC_R3_PY 0.1875
+param set-default CA_MC_R3_CT 6.5
+param set-default CA_MC_R3_KM -0.05
+
+
+set MAV_TYPE 21
+
+set MIXER_FILE etc/mixers-sitl/tiltrotor_sitl_direct.main.mix
+set MIXER custom
