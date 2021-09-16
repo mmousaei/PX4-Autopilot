@@ -69,9 +69,9 @@ param set VT_DWN_PITCH_MAX 25
 param set VT_FWD_THRUST_EN 4
 param set VT_FWD_THRUST_SC 1.0
 #param set VT_FW_PERM_STAB 1
-param set VT_ARSP_BLEND 1
+param set VT_ARSP_BLEND 8
 param set VT_ARSP_TRANS 5
-param set VT_PSHER_RMP_DT 0
+param set VT_PSHER_RMP_DT 3
 #param set-default VT_F_TRANS_DUR 15
 param set-default VT_F_TRANS_THR 0.75
 #param set-default VT_ARSP_TRANS 20

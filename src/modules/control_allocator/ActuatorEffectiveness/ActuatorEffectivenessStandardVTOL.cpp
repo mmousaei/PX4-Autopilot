@@ -58,9 +58,9 @@ ActuatorEffectivenessStandardVTOL::getEffectivenessMatrix(matrix::Matrix<float, 
 	float tau_x2 = 1.5925f; //1.21875f; //2.3198f;
 	float tau_y = 0.98475; //0.98475; //2.3198f;
 	float tau_z = 0.325f;
-	float ale = 24.1014;
-	float ele = 114.2482;
-	float Tx_tran = 6.5;
+	float ale = 24.1014*0.1;
+	float ele = 114.2482*0.1;
+	float Tx_tran = 6.5*0.5;
 	switch (_flight_phase) {
 	case FlightPhase::HOVER_FLIGHT:  {
 			const float standard_vtol[NUM_AXES][NUM_ACTUATORS] = {
