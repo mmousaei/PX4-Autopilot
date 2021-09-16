@@ -436,9 +436,9 @@ bool MixingOutput::update()
 		actuator_outputs_s actuator_outputs{};
 		setAndPublishActuatorOutputs(mixed_num_outputs, actuator_outputs);
 		// Mohammad: print actuator outputs to drivers
-		for(int l = 0; l < 13; ++l) {
-			PX4_ERR("act out %d = %f\n", l, double(actuator_outputs.output[l]));
-		}
+		// for(int l = 0; l < 13; ++l) {
+		// 	PX4_ERR("act out %d = %f\n", l, double(actuator_outputs.output[l]));
+		// }
 		// PX4_ERR("num out %d\n", int(mixed_num_outputs));
 		publishMixerStatus(actuator_outputs);
 		updateLatencyPerfCounter(actuator_outputs);

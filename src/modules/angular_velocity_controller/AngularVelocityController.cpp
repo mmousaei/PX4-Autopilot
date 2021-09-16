@@ -254,6 +254,12 @@ AngularVelocityController::publish_torque_setpoint()
 	v_torque_sp.xyz[0] = (PX4_ISFINITE(torque_sp(0))) ? torque_sp(0) : 0.0f;
 	v_torque_sp.xyz[1] = (PX4_ISFINITE(torque_sp(1))) ? torque_sp(1) : 0.0f;
 	v_torque_sp.xyz[2] = (PX4_ISFINITE(torque_sp(2))) ? torque_sp(2) : 0.0f;
+	// v_torque_sp.xyz[0] = -0.002803f;
+	// v_torque_sp.xyz[1] = -0.003579f;
+	// v_torque_sp.xyz[2] = -0.000178f;
+	// printf("moment setpoint x: %f\n", double(v_torque_sp.xyz[0]));
+	// printf("moment setpoint y: %f\n", double(v_torque_sp.xyz[1]));
+	// printf("moment setpoint z: %f\n\n", double(v_torque_sp.xyz[2]));
 
 	_vehicle_torque_setpoint_pub.publish(v_torque_sp);
 }
@@ -267,6 +273,12 @@ AngularVelocityController::publish_thrust_setpoint()
 	v_thrust_sp.xyz[0] = (PX4_ISFINITE(_thrust_sp(0))) ? (_thrust_sp(0)) : 0.0f;
 	v_thrust_sp.xyz[1] = (PX4_ISFINITE(_thrust_sp(1))) ? (_thrust_sp(1)) : 0.0f;
 	v_thrust_sp.xyz[2] = (PX4_ISFINITE(_thrust_sp(2))) ? (_thrust_sp(2)) : 0.0f;
+	// printf("thrust setpoint x: %f\n", double(v_thrust_sp.xyz[0]));
+	// printf("thrust setpoint y: %f\n", double(v_thrust_sp.xyz[1]));
+	// printf("thrust setpoint z: %f\n", double(v_thrust_sp.xyz[2]));
+	// v_thrust_sp.xyz[0] = 0.0f;
+	// v_thrust_sp.xyz[1] = 0.0f;
+	// v_thrust_sp.xyz[2] = -0.7f;
 
 	_vehicle_thrust_setpoint_pub.publish(v_thrust_sp);
 }

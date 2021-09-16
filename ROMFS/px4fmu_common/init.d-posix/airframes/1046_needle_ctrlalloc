@@ -65,24 +65,28 @@ param set-default CA_ACT1_MAX 1
 param set-default CA_ACT2_MAX 1
 param set-default CA_ACT3_MAX 1
 # tilts
-param set-default CA_ACT4_MIN -0.0
-param set-default CA_ACT5_MIN -0.0
-param set-default CA_ACT6_MIN -0.0
-param set-default CA_ACT7_MIN -0.0
+param set-default CA_ACT4_MIN -0.1
+param set-default CA_ACT5_MIN -0.1
+param set-default CA_ACT6_MIN -0.1
+param set-default CA_ACT7_MIN -0.1
 
 param set-default CA_ACT4_MAX 1.5
 param set-default CA_ACT5_MAX 1.5
 param set-default CA_ACT6_MAX 1.5
 param set-default CA_ACT7_MAX 1.5
 # ailerons
-#param set-default CA_ACT8_MIN 1.45
-#param set-default CA_ACT9_MIN 1.45
-#param set-default CA_ACT8_MAX 1.55
-#param set-default CA_ACT9_MAX 1.55
+param set-default CA_ACT8_MIN 1.45
+param set-default CA_ACT9_MIN 1.45
+param set-default CA_ACT8_MAX 1.55
+param set-default CA_ACT9_MAX 1.55
 # elevator
-#param set-default CA_ACT10_MIN 1.6
+param set-default CA_ACT10_MIN 1.6
 
-#param set-default CA_ACT10_MAX 1.7
+param set-default CA_ACT10_MAX 1.7
+# rudder
+param set-default CA_ACT11_MIN 1.6
+
+param set-default CA_ACT11_MAX 1.7
 
 
 set MAV_TYPE 21

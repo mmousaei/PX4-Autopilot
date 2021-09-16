@@ -351,7 +351,7 @@ ControlAllocator::Run()
 		// the current mixer system and multicopter controller
 		// TODO: remove
 		publish_legacy_actuator_controls();
-		// print_status();
+		print_status();
 
 	}
 
@@ -470,18 +470,18 @@ ControlAllocator::publish_legacy_actuator_controls()
 		actuator_controls_5.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i + 8))) ? actuator_sp_normalized(i + 8) : 0.0f;
 	}
 	// Mohammad limit motors
-	// actuator_controls_4.control[0] = 0.0f;
-	// actuator_controls_4.control[1] = 0.0f;
-	// actuator_controls_4.control[2] = 0.0f;
-	// actuator_controls_4.control[3] = 0.0f;
-	// actuator_controls_4.control[4] = 1.6f;
-	// actuator_controls_4.control[5] = -1.0f;
+	// actuator_controls_4.control[0] = 0.1f;
+	// actuator_controls_4.control[1] = 0.1f;
+	// actuator_controls_4.control[2] = 0.1f;
+	// actuator_controls_4.control[3] = 0.1f;
+	// actuator_controls_4.control[4] = 0.9f;
+	// actuator_controls_4.control[5] = -0.9f;
 	// actuator_controls_4.control[6] = -1.0f;
 	// actuator_controls_4.control[7] = -1.0f;
 	// actuator_controls_5.control[0] = 1.0f;
 	// actuator_controls_5.control[1] = -2.0f;
 	// actuator_controls_5.control[2] = 2.0f;
-	// actuator_controls_5.control[3] = 1.0f;
+	// actuator_controls_5.control[3] = -2.0f;
 	// actuator_controls_5.control[4] = 1.0f;
 	// actuator_controls_5.control[5] = 1.0f;
 

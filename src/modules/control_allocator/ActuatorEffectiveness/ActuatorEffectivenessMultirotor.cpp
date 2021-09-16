@@ -49,7 +49,7 @@ ActuatorEffectivenessMultirotor::ActuatorEffectivenessMultirotor():
 bool
 ActuatorEffectivenessMultirotor::getEffectivenessMatrix(matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &matrix)
 {
-	printf("here in multirotor effectiveness!!!\n");
+	// printf("here in multirotor effectiveness!!!\n");
 	// Check if parameters have changed
 	if (_updated || _parameter_update_sub.updated()) {
 		// clear update

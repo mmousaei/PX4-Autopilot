@@ -53,18 +53,21 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	}
 	// Trim
 	float tilt = 0.0f;
+	float airspeed = 0.0f;
 	// PX4_ERR("NUM_AXES: "+string(NUM_AXES));
 
 	switch (_flight_phase) {
 	case FlightPhase::HOVER_FLIGHT:  {
 			// printf("hover flight mode!\n");
 			tilt = 0.0f;
+			airspeed = 0.0f;
 			break;
 		}
 
 	case FlightPhase::FORWARD_FLIGHT: {
 			// printf("FF MODE!\n");
 			tilt = 1.5f;
+			airspeed = 20.0f;
 			break;
 		}
 
@@ -72,6 +75,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	case FlightPhase::TRANSITION_HF_TO_FF: {
 			// printf("TRANSITION\n");
 			tilt = 1.0f;
+			airspeed = 8.0f;
 			break;
 		}
 	}
@@ -88,24 +92,47 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 
 	// Effectiveness
 	// Mohammad: NUM_AXES: 6, NUM_ACTUATORS: 16 for our vtol!!!
-	const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
-		{-0.5f * cosf(_trim(4)),  0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), 0.5f * _trim(0) *sinf(_trim(4)), -0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), -0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
-		{ 0.5f * cosf(_trim(4)), -0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), -0.5f * _trim(0) *sinf(_trim(4)),  0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f},
-		{-0.5f * sinf(_trim(4)),  0.5f * sinf(_trim(5)),  0.5f * sinf(_trim(6)), -0.5f * sinf(_trim(7)), -0.5f * _trim(0) *cosf(_trim(4)), 0.5f * _trim(1) *cosf(_trim(5)), 0.5f * _trim(2) *cosf(_trim(6)), -0.5f * _trim(3) *cosf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
-		{ 0.25f * sinf(_trim(4)), 0.25f * sinf(_trim(5)), 0.25f * sinf(_trim(6)), 0.25f * sinf(_trim(7)), 0.25f * _trim(0) *cosf(_trim(4)), 0.25f * _trim(1) *cosf(_trim(5)), 0.25f * _trim(2) *cosf(_trim(6)), 0.25f * _trim(3) *cosf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
-		{ 0.f,  0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
-		{-0.25f * cosf(_trim(4)), -0.25f * cosf(_trim(5)), -0.25f * cosf(_trim(6)), -0.25f * cosf(_trim(7)), 0.25f * _trim(0) *sinf(_trim(4)), 0.25f * _trim(1) *sinf(_trim(5)), 0.25f * _trim(2) *sinf(_trim(6)), 0.25f * _trim(3) *sinf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
-	};
-
-
 	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
-	// 	{ 0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
-	// 	{ 0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f},
-	// 	{ 0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f},
-	// 	{ 0.25f * sinf(_trim(4)), 0.25f * sinf(_trim(5)), 0.25f * sinf(_trim(6)), 0.25f * sinf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{-0.5f * cosf(_trim(4)),  0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), 0.5f * _trim(0) *sinf(_trim(4)), -0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), -0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.5f * cosf(_trim(4)), -0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), -0.5f * _trim(0) *sinf(_trim(4)),  0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), 0.f, 0.f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{-0.5f * sinf(_trim(4)),  0.5f * sinf(_trim(5)),  0.5f * sinf(_trim(6)), -0.5f * sinf(_trim(7)), -0.5f * _trim(0) *cosf(_trim(4)), 0.5f * _trim(1) *cosf(_trim(5)), 0.5f * _trim(2) *cosf(_trim(6)), -0.5f * _trim(3) *cosf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.25f * sinf(_trim(4)), 0.25f * sinf(_trim(5)), 0.25f * sinf(_trim(6)), 0.25f * sinf(_trim(7)), 0.25f * _trim(0) *cosf(_trim(4)), 0.25f * _trim(1) *cosf(_trim(5)), 0.25f * _trim(2) *cosf(_trim(6)), 0.25f * _trim(3) *cosf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
 	// 	{ 0.f,  0.f,  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
-	// 	{-0.25f * cosf(_trim(4)), -0.25f * cosf(_trim(5)), -0.25f * cosf(_trim(6)), -0.25f * cosf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
+	// 	{-0.25f * cosf(_trim(4)), -0.25f * cosf(_trim(5)), -0.25f * cosf(_trim(6)), -0.25f * cosf(_trim(7)), 0.25f * _trim(0) *sinf(_trim(4)), 0.25f * _trim(1) *sinf(_trim(5)), 0.25f * _trim(2) *sinf(_trim(6)), 0.25f * _trim(3) *sinf(_trim(7)), 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
 	// };
+
+	float Px_0 = 0.55f;
+	float Py_0 = -0.55f;
+	float Pz_0 = 0.0f;
+	float Px_1 = -0.55f;
+	float Py_1 = 0.55f;
+	float Pz_1 = 0.0f;
+	float Px_2 = 0.55f;
+	float Py_2 = 0.55f;
+	float Pz_2 = 0.0f;
+	float Px_3 = -0.55f;
+	float Py_3 = -0.55f;
+	float Pz_3 = 0.0f;
+	float Ct = 6.5f;
+	float Km = 0.05f;
+	float ro = 1.225f;
+	float q_bar = ro * airspeed * airspeed / 2;
+	float S = 0.44f;
+	float b = 2.0f;
+	float c_bar = 0.22f;
+	float Cla = 0.11730f;
+	float Cme = 0.55604f;
+	float Cnr = 0.08810f;
+
+	// 			w_0							  w_1							w_2								w_3								theta_0									  theta_1										theta_2												theta_3								   delta_a left		   delta_a right	   delta_e			   delta_r
+	const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
+		{-Py_0 * cosf(_trim(4)) - Ct * Km * sinf(_trim(4)),	-Py_1 * cosf(_trim(5)) - Ct * Km * sinf(_trim(5)),	 -Py_2 * cosf(_trim(6)) - Ct * Km * sinf(_trim(6)),	-Py_3 * cosf(_trim(7)) - Ct * Km * sinf(_trim(7)),	 Py_0 * _trim(0) *sinf(_trim(4)) - Ct * Km * _trim(0) *cosf(_trim(4)), 	     Py_1 * _trim(1) *sinf(_trim(5)) - Ct * Km * _trim(1) *cosf(_trim(5)),		 Py_2 * _trim(2) *sinf(_trim(6)) - Ct * Km * _trim(2) *cosf(_trim(6)),				 Py_3 * _trim(3) *sinf(_trim(7)) - Ct * Km * _trim(3) *cosf(_trim(7)),  			-q_bar*S*b*Cla,		 q_bar*S*b*Cla,		 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{ Px_0 * cosf(_trim(4)) + Pz_0 * sinf(_trim(4)),       	 Px_1 * cosf(_trim(5)) + Pz_1 * sinf(_trim(5)),		 Px_2 * cosf(_trim(6)) + Pz_2 * sinf(_trim(6)),		 Px_3 * cosf(_trim(7)) + Pz_3 * sinf(_trim(7)),		-Px_0 * _trim(0) *sinf(_trim(4)) + Pz_0 * _trim(0) *cosf(_trim(4)), 	    -Px_1 * _trim(1) *sinf(_trim(5)) + Pz_1 * _trim(1) *cosf(_trim(5)),			-Px_2 * _trim(2) *sinf(_trim(6)) + Pz_2 * _trim(2) *cosf(_trim(6)),				-Px_3 * _trim(3) *sinf(_trim(7)) + Pz_3 * _trim(3) *cosf(_trim(7)),  				 0.f, 		 	 0.f, 		 	 q_bar*S*c_bar*Cme,		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{-Py_0 * sinf(_trim(4)) + Ct * Km * cosf(_trim(4)),	-Py_1 * sinf(_trim(5)) + Ct * Km * cosf(_trim(5)),	 -Py_2 * sinf(_trim(6)) + Ct * Km * cosf(_trim(6)),	-Py_3 * sinf(_trim(7)) + Ct * Km * cosf(_trim(7)),	-Py_0 * _trim(0) *cosf(_trim(4)) - Ct * Km * _trim(0) *sinf(_trim(4)), 	    -Py_1 * _trim(1) *cosf(_trim(5)) - Ct * Km * _trim(1) *sinf(_trim(5)),		-Py_2 * _trim(2) *cosf(_trim(6)) - Ct * Km * _trim(2) *sinf(_trim(6)), 				-Py_3 * _trim(3) *cosf(_trim(7)) - Ct * Km * _trim(3) *sinf(_trim(7)),  			 0.f, 		 	 0.f, 		 	 0.f, 		 		 q_bar*S*b*Cnr, 	0.f, 0.f, 0.f, 0.f},
+		{ Ct * sinf(_trim(4)),	 				 Ct * sinf(_trim(5)),					 Ct * sinf(_trim(6)),					 Ct * sinf(_trim(7)),					 Ct * _trim(0) *sinf(_trim(4)), 					     Ct * _trim(1) *sinf(_trim(5)),							 Ct * _trim(2) *sinf(_trim(6)), 								 Ct * _trim(3) *sinf(_trim(7)),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{ 0.f,  			 			 0.f,  							 0.f,  							 0.f,	 						 0.f,		 		  					     0.f, 			      							 0.f, 			    	  								 0.f, 			           								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{-Ct * cosf(_trim(4)),	 			        -Ct * cosf(_trim(5)),					-Ct * cosf(_trim(6)),					-Ct * cosf(_trim(7)),					 Ct * _trim(0) *cosf(_trim(4)), 					     Ct * _trim(1) *cosf(_trim(5)),							 Ct * _trim(2) *cosf(_trim(6)), 								 Ct * _trim(3) *cosf(_trim(7)),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f}
+	};
 	matrix = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS>(tiltrotor_vtol);
 
 	// Temporarily disable a few controls (WIP)
