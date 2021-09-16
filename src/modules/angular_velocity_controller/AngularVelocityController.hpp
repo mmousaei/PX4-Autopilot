@@ -59,6 +59,8 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 #include <uORB/topics/vehicle_torque_setpoint.h>
+#include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/vehicle_attitude_setpoint.h>
 
 using namespace time_literals;
 
@@ -108,7 +110,8 @@ private:
 	uORB::Subscription _vehicle_angular_acceleration_sub{ORB_ID(vehicle_angular_acceleration)}; 	/**< vehicle angular acceleration subscription */
 	uORB::Subscription _vehicle_control_mode_sub{ORB_ID(vehicle_control_mode)};			/**< vehicle control mode subscription */
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};			/**< vehicle land detected subscription */
-	uORB::Subscription _vehicle_rates_setpoint_sub{ORB_ID(vehicle_rates_setpoint)};			/**< vehicle rates setpoint subscription */
+	uORB::Subscription _vehicle_rates_setpoint_sub{ORB_ID(vehicle_rates_setpoint)};
+	uORB::Subscription _v_att_sp_sub{ORB_ID(vehicle_attitude_setpoint)};			/**< vehicle rates setpoint subscription */
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};					/**< vehicle status subscription */
 	uORB::Subscription _hover_thrust_estimate_sub{ORB_ID(hover_thrust_estimate)};
 
@@ -132,6 +135,7 @@ private:
 	matrix::Vector3f _angular_velocity_sp;		/**< angular velocity setpoint */
 	matrix::Vector3f _angular_acceleration;		/**< angular acceleration (estimated) */
 	matrix::Vector3f _thrust_sp;			/**< thrust setpoint */
+	matrix::Vector3f _thrust_sp0;			/**< thrust setpoint */
 
 	float _hover_thrust{0.5f};			/**< Normalized hover thrust **/
 

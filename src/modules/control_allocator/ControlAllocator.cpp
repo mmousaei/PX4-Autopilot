@@ -277,8 +277,8 @@ ControlAllocator::Run()
 		if (vehicle_status.vehicle_type == vehicle_status_s::VEHICLE_TYPE_ROTARY_WING) {
 			_flag_trans = false;
 			flight_phase = ActuatorEffectiveness::FlightPhase::HOVER_FLIGHT;
-			//PX4_ERR("Current flight phase = hover flight");
-			//print_status();
+			// PX4_ERR("Current flight phase = hover flight");
+			// print_status();
 
 		} else {
 			flight_phase = ActuatorEffectiveness::FlightPhase::FORWARD_FLIGHT;

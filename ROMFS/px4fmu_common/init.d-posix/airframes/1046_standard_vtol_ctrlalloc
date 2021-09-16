@@ -44,7 +44,7 @@ param set-default MIS_TAKEOFF_ALT 10
 #param set-default MIS_YAW_TMT 10
 #param set-default MIS_LTRMIN_ALT 10
 
-param set-default MPC_ACC_HOR_MAX 2
+param set-default MPC_ACC_HOR_MAX 5
 #param set-default MPC_THR_MIN 0.1
 #param set-default MPC_TKO_SPEED 1
 param set-default MPC_XY_P 0.8
@@ -52,20 +52,25 @@ param set-default MPC_XY_VEL_P_ACC 3
 param set-default MPC_XY_VEL_I_ACC 4
 param set-default MPC_XY_VEL_D_ACC 0.1
 param set-default MPC_Z_VEL_MAX_DN 1.5
-param set AVC_Y_P 30.0
+param set AVC_Y_P 22.0
+param set AVC_Y_K 1.0
 param set AVC_X_P 30.0
 param set AVC_Z_P 20.0
-#param set AVC_Y_I 0.25
-#param set AVC_X_I 0.25
+param set AVC_Y_I 0.6
+param set AVC_X_I 0.3
+param set AVC_Z_I 0.3
 #param set AVC_Y_D 0.45
 #param set AVC_X_D 30.0
 
 param set-default NAV_ACC_RAD 5
 param set-default NAV_LOITER_RAD 80
 
+param set VT_DWN_PITCH_MAX 25
 param set VT_FWD_THRUST_EN 4
+param set VT_FWD_THRUST_SC 1.0
 #param set VT_FW_PERM_STAB 1
-#param set VT_ARSP_BLEND 0
+param set VT_ARSP_BLEND 1
+param set VT_ARSP_TRANS 5
 param set VT_PSHER_RMP_DT 0
 #param set-default VT_F_TRANS_DUR 15
 param set-default VT_F_TRANS_THR 0.75
@@ -78,7 +83,7 @@ param set-default VT_TYPE 2
 
 
 param set-default CA_AIRFRAME 1
-param set-default CA_METHOD 0
+param set-default CA_METHOD 1
 # rotors
 param set-default CA_ACT0_MIN 0
 param set-default CA_ACT1_MIN 0
