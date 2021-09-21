@@ -59,7 +59,7 @@ ActuatorEffectivenessStandardVTOL::getEffectivenessMatrix(matrix::Matrix<float, 
 	float tau_y = 0.98475; //0.98475; //2.3198f;
 	float tau_z = 0.325f;
 	float ale = 24.1014*0.1;
-	float ele = 114.2482*0.1;
+	float ele = 114.2482*0.1*0.5*0.5*0.5;
 	float Tx_tran = 6.5*0.5;
 	switch (_flight_phase) {
 	case FlightPhase::HOVER_FLIGHT:  {

@@ -173,10 +173,10 @@ AngularVelocityController::Run()
 			_angular_velocity_sp(1) = vehicle_rates_setpoint.pitch;
 			_angular_velocity_sp(2) = vehicle_rates_setpoint.yaw;
 			_thrust_sp = Vector3f(vehicle_rates_setpoint.thrust_body);
-			PX4_INFO("_thrust_sp before x= %f, z=%f", double(_thrust_sp(0)), double(_thrust_sp(2)));
+			// PX4_INFO("_thrust_sp before x= %f, z=%f", double(_thrust_sp(0)), double(_thrust_sp(2)));
 			// Scale _thrust_sp in Newton, assuming _hover_thrust is equivalent to 1G
 			_thrust_sp *= (_param_vm_mass.get() * CONSTANTS_ONE_G / _hover_thrust);
-			PX4_INFO("_thrust_sp after x= %f, z=%f", double(_thrust_sp(0)), double(_thrust_sp(2)));
+			// PX4_INFO("_thrust_sp after x= %f, z=%f", double(_thrust_sp(0)), double(_thrust_sp(2)));
 		}
 		// vehicle_attitude_setpoint_s vehicle_attitude_setpoint;
 		// if (_v_att_sp_sub.update(&vehicle_attitude_setpoint)) {
