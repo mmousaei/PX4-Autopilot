@@ -278,7 +278,7 @@ ControlAllocator::Run()
 			_flag_trans = false;
 			flight_phase = ActuatorEffectiveness::FlightPhase::HOVER_FLIGHT;
 			// PX4_ERR("Current flight phase = hover flight");
-			// print_status();
+			//print_status();
 
 		} else {
 			flight_phase = ActuatorEffectiveness::FlightPhase::FORWARD_FLIGHT;
@@ -292,7 +292,7 @@ ControlAllocator::Run()
 			if (vehicle_status.in_transition_to_fw) {
 				flight_phase = ActuatorEffectiveness::FlightPhase::TRANSITION_HF_TO_FF;
 				PX4_INFO("Current flight phase = hf to ff");
-				//print_status();
+				print_status();
 
 			} else {
 				flight_phase = ActuatorEffectiveness::FlightPhase::TRANSITION_FF_TO_HF;
@@ -346,10 +346,11 @@ ControlAllocator::Run()
 		c(3) = _thrust_sp(0);
 		c(4) = _thrust_sp(1);
 		c(5) = _thrust_sp(2);
-		// if (_flag_trans) {
-		// 	for(size_t k = 0; k < 6; k++){
-		// 		PX4_INFO("wrench %zu = %f", k, double(c(k)));}
-		// 		}
+		if (_flag_trans) {
+			// for(size_t k = 0; k < 6; k++){
+			// 	PX4_INFO("wrench %zu = %f", k, double(c(k)));}
+			PX4_INFO("wrench = %f, %f, %f, %f, %f, %f", double(c(0)), double(c(1)), double(c(2)), double(c(3)), double(c(4)), double(c(5)));
+				}
 
 		_control_allocation->setControlSetpoint(c);
 
@@ -482,7 +483,7 @@ ControlAllocator::publish_legacy_actuator_controls()
 			//actuator_controls_4.control[4] = 0.35f;
 			//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i))*1000000));
 			//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i)*1000000));
-			PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d normalized", i, (int)actuator_controls_4.control[i], (int)((actuator_controls_4.control[i]-(int)actuator_controls_4.control[i])*1000000));
+			//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d normalized", i, (int)actuator_controls_4.control[i], (int)((actuator_controls_4.control[i]-(int)actuator_controls_4.control[i])*1000000));
 		}
 		//PX4_ERR("Allocated actuator group 5 %zu = %d.%.6d", i, (int)actuator_controls_5.control[i], (int)((actuator_controls_5.control[i]-(int)actuator_controls_5.control[i])*1000000));
 	}

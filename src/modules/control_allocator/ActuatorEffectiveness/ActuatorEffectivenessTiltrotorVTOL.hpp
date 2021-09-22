@@ -58,7 +58,7 @@ public:
 	 */
 	void setFlightPhase(const FlightPhase &flight_phase) override;
 
-	int numActuators() const override { return 10; }
+	int numActuators() const override { return 11; }
 protected:
 	bool _updated{true};
 };
