@@ -78,6 +78,23 @@ private:
 		param_t front_trans_dur_p2;
 	} _params_handles_tiltrotor;
 
+
+	struct {
+		float pusher_ramp_dt;
+		float back_trans_ramp;
+		float pitch_setpoint_offset;
+		float reverse_output;
+		float reverse_delay;
+	} _params_standard;
+
+	struct {
+		param_t pusher_ramp_dt;
+		param_t back_trans_ramp;
+		param_t pitch_setpoint_offset;
+		param_t reverse_output;
+		param_t reverse_delay;
+	} _params_handles_standard;
+
 	enum class vtol_mode {
 		MC_MODE = 0,			/**< vtol is in multicopter mode */
 		TRANSITION_FRONT_P1,	/**< vtol is in front transition part 1 mode */
@@ -99,7 +116,7 @@ private:
 	} _vtol_schedule;
 
 	float _tilt_control{0.0f};		/**< actuator value for the tilt servo */
-
+	float _pusher_throttle{0.0f};
 	void parameters_update() override;
 	hrt_abstime _last_timestamp_disarmed{0}; /**< used for calculating time since arming */
 	bool _tilt_motors_for_startup{false};

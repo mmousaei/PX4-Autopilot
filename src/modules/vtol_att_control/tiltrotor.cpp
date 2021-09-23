@@ -64,6 +64,12 @@ Tiltrotor::Tiltrotor(VtolAttitudeControl *attc) :
 	_params_handles_tiltrotor.tilt_fw = param_find("VT_TILT_FW");
 	_params_handles_tiltrotor.tilt_spinup = param_find("VT_TILT_SPINUP");
 	_params_handles_tiltrotor.front_trans_dur_p2 = param_find("VT_TRANS_P2_DUR");
+
+	_params_handles_standard.pusher_ramp_dt = param_find("VT_PSHER_RMP_DT");
+	_params_handles_standard.back_trans_ramp = param_find("VT_B_TRANS_RAMP");
+	_params_handles_standard.pitch_setpoint_offset = param_find("FW_PSP_OFF");
+	_params_handles_standard.reverse_output = param_find("VT_B_REV_OUT");
+	_params_handles_standard.reverse_delay = param_find("VT_B_REV_DEL");
 }
 
 void
@@ -90,6 +96,26 @@ Tiltrotor::parameters_update()
 	/* vtol front transition phase 2 duration */
 	param_get(_params_handles_tiltrotor.front_trans_dur_p2, &v);
 	_params_tiltrotor.front_trans_dur_p2 = v;
+
+	/* duration of a forwards transition to fw mode */
+	param_get(_params_handles_standard.pusher_ramp_dt, &v);
+	_params_standard.pusher_ramp_dt = math::constrain(v, 0.0f, 20.0f);
+
+	/* MC ramp up during back transition to mc mode */
+	param_get(_params_handles_standard.back_trans_ramp, &v);
+	_params_standard.back_trans_ramp = math::constrain(v, 0.0f, _params->back_trans_duration);
+
+	/* pitch setpoint offset */
+	param_get(_params_handles_standard.pitch_setpoint_offset, &v);
+	_params_standard.pitch_setpoint_offset = math::radians(v);
+
+	/* reverse output */
+	param_get(_params_handles_standard.reverse_output, &v);
+	_params_standard.reverse_output = math::constrain(v, 0.0f, 1.0f);
+
+	/* reverse output */
+	param_get(_params_handles_standard.reverse_delay, &v);
+	_params_standard.reverse_delay = math::constrain(v, 0.0f, 10.0f);
 }
 
 void Tiltrotor::update_vtol_state()
@@ -103,7 +129,7 @@ void Tiltrotor::update_vtol_state()
 	if (_vtol_vehicle_status->vtol_transition_failsafe) {
 		// Failsafe event, switch to MC mode immediately
 		_vtol_schedule.flight_mode = vtol_mode::MC_MODE;
-
+		_pusher_throttle = 0.0f;
 		//reset failsafe when FW is no longer requested
 		if (!_attc->is_fixed_wing_requested()) {
 			_vtol_vehicle_status->vtol_transition_failsafe = false;
@@ -114,6 +140,7 @@ void Tiltrotor::update_vtol_state()
 		// plane is in multicopter mode
 		switch (_vtol_schedule.flight_mode) {
 		case vtol_mode::MC_MODE:
+			_pusher_throttle = 0.0f;
 			break;
 
 		case vtol_mode::FW_MODE:
@@ -124,11 +151,13 @@ void Tiltrotor::update_vtol_state()
 		case vtol_mode::TRANSITION_FRONT_P1:
 			// failsafe into multicopter mode
 			_vtol_schedule.flight_mode = vtol_mode::MC_MODE;
+			_pusher_throttle = 0.0f;
 			break;
 
 		case vtol_mode::TRANSITION_FRONT_P2:
 			// failsafe into multicopter mode
 			_vtol_schedule.flight_mode = vtol_mode::MC_MODE;
+			_pusher_throttle = 0.0f;
 			break;
 
 		case vtol_mode::TRANSITION_BACK:
@@ -307,6 +336,15 @@ void Tiltrotor::update_transition_state()
 			_tilt_control = math::max(_tilt_control, ramped_up_tilt);
 		}
 
+		if (_params_standard.pusher_ramp_dt <= 0.0f) {
+			// just set the final target throttle value
+			_pusher_throttle = _params->front_trans_throttle;
+
+		} else if (_pusher_throttle <= _params->front_trans_throttle) {
+			// ramp up throttle to the target throttle value
+			_pusher_throttle = _params->front_trans_throttle * time_since_trans_start / _params_standard.pusher_ramp_dt;
+		}
+
 		// at low speeds give full weight to MC
 		_mc_roll_weight = 1.0f;
 		_mc_yaw_weight = 1.0f;
@@ -332,7 +370,7 @@ void Tiltrotor::update_transition_state()
 		}
 
 		_thrust_transition = -_mc_virtual_att_sp->thrust_body[2];
-
+		_v_att_sp->thrust_body[0] = _tilt_control;
 		// in stabilized, acro or manual mode, set the MC thrust to the throttle stick position (coming from the FW attitude setpoint)
 		if (!_v_control_mode->flag_control_climb_rate_enabled) {
 			_v_att_sp->thrust_body[2] = -_fw_virtual_att_sp->thrust_body[0];
@@ -356,7 +394,7 @@ void Tiltrotor::update_transition_state()
 
 
 		_thrust_transition = -_mc_virtual_att_sp->thrust_body[2];
-
+		_v_att_sp->thrust_body[0] = _tilt_control;
 		// in stabilized, acro or manual mode, set the MC thrust to the throttle stick position (coming from the FW attitude setpoint)
 		if (!_v_control_mode->flag_control_climb_rate_enabled) {
 			_v_att_sp->thrust_body[2] = -_fw_virtual_att_sp->thrust_body[0];
@@ -377,7 +415,14 @@ void Tiltrotor::update_transition_state()
 			_tilt_control = _params_tiltrotor.tilt_fw -
 					fabsf(_params_tiltrotor.tilt_fw - _params_tiltrotor.tilt_mc) * time_since_trans_start / 1.0f;
 		}
+		_pusher_throttle = 0.0f;
 
+		if (time_since_trans_start >= _params_standard.reverse_delay) {
+			// Handle throttle reversal for active breaking
+			float thrscale = (time_since_trans_start - _params_standard.reverse_delay) / (_params_standard.pusher_ramp_dt);
+			thrscale = math::constrain(thrscale, 0.0f, 1.0f);
+			_pusher_throttle = thrscale * _params->back_trans_throttle;
+		}
 		_mc_yaw_weight = 1.0f;
 
 		// control backtransition deceleration using pitch.

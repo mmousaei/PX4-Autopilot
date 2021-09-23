@@ -65,15 +65,15 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 		}
 
 	case FlightPhase::FORWARD_FLIGHT: {
-			tilt = 1.5707963267948966f;
+			tilt = 1.0;
 			airspeed = 20.0f;
 			break;
 		}
 
 	case FlightPhase::TRANSITION_FF_TO_HF:
 	case FlightPhase::TRANSITION_HF_TO_FF: {
-			tilt = 0.7853981633974483;//0.5759586531581288f;
-			airspeed = 8.0f;
+			tilt = 0.6;//0.5759586531581288f;
+			airspeed = 20.0f;
 			break;
 		}
 	}
@@ -87,6 +87,11 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	_trim(5) = tilt;
 	_trim(6) = tilt;
 	_trim(7) = tilt;
+
+	float trim4_m = _trim(4)*1.570796f;
+	float trim5_m = _trim(5)*1.570796f;
+	float trim6_m = _trim(6)*1.570796f;
+	float trim7_m = _trim(7)*1.570796f;
 
 	// // Effectiveness
 	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
@@ -127,18 +132,18 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float S = 0.4266f;
 	float b = 2.0f;
 	float c_bar = 0.2f;
-	float Cla = 0.11730f;
-	float Cme = 0.55604f;
+	float Cla = 0.11730*0.1;
+	float Cme = 0.55604*0.1*0.5*0.5*0.5;
 	float Cnr = 0.0;//0.08810f;
 
 	// 			w_0							  w_1							w_2								w_3								theta_0									  theta_1										theta_2												theta_3								   delta_a left		   delta_a right	   delta_e			   delta_r
 	const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
-		{-Py_0 * Ct*cosf(_trim(4)) - Ct * Km * sinf(_trim(4)),	-Py_1 * Ct*cosf(_trim(5)) - Ct * Km * sinf(_trim(5)),	 -Py_2 * Ct*cosf(_trim(6)) + Ct * Km * sinf(_trim(6)),	-Py_3 * Ct*cosf(_trim(7)) + Ct * Km * sinf(_trim(7)),	 Py_0 * Ct*_trim(0) *sinf(_trim(4)) - Ct * Km * _trim(0) *cosf(_trim(4)),    		     Py_1 * Ct*_trim(1) *sinf(_trim(5)) - Ct * Km * _trim(1) *cosf(_trim(5)),		 		Py_2 * Ct*_trim(2) *sinf(_trim(6)) + Ct * Km * _trim(2) *cosf(_trim(6)),		         Py_3 * Ct*_trim(3) *sinf(_trim(7)) + Ct * Km * _trim(3) *cosf(_trim(7)),  			-q_bar*S*b*Cla,		 q_bar*S*b*Cla,		 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
-		{ Ct*(Px_0 * cosf(_trim(4)) + Pz_0 * sinf(_trim(4))),    Ct*(Px_1 * cosf(_trim(5)) + Pz_1 * sinf(_trim(5))),	  Ct*(Px_2 * cosf(_trim(6)) + Pz_2 * sinf(_trim(6))),	 Ct*(Px_3 * cosf(_trim(7)) + Pz_3 * sinf(_trim(7))),	 Ct*_trim(0) *(-Px_0 * sinf(_trim(4)) + Pz_0 * cosf(_trim(4))), 	     		     Ct*_trim(1) *(-Px_1 *sinf(_trim(5)) + Pz_1 * cosf(_trim(5))),					Ct*_trim(2) *(-Px_2 *sinf(_trim(6)) + Pz_2 * cosf(_trim(6))),					Ct*_trim(3) *(-Px_3 *sinf(_trim(7)) + Pz_3 *cosf(_trim(7))),  					 0.f, 		 	 0.f, 		 	 q_bar*S*c_bar*Cme,		 0.f, 			0.f, 0.f, 0.f, 0.f},
-		{-Py_0 * Ct*sinf(_trim(4)) + Ct * Km * cosf(_trim(4)),	-Py_1 * Ct*sinf(_trim(5)) + Ct * Km * cosf(_trim(5)),	 -Py_2 * Ct*sinf(_trim(6)) - Ct * Km * cosf(_trim(6)),	-Py_3 * Ct*sinf(_trim(7)) - Ct * Km * cosf(_trim(7)),	-Py_0 * Ct*_trim(0) *cosf(_trim(4)) - Ct * Km * _trim(0) *sinf(_trim(4)),   		    -Py_1 * Ct*_trim(1) *cosf(_trim(5)) - Ct * Km * _trim(1) *sinf(_trim(5)),				-Py_2 * Ct*_trim(2) *cosf(_trim(6)) + Ct * Km * _trim(2) *sinf(_trim(6)), 			-Py_3 * Ct*_trim(3) *cosf(_trim(7)) + Ct * Km * _trim(3) *sinf(_trim(7)),  			 0.f, 		 	 0.f, 		 	 0.f, 		 		 q_bar*S*b*Cnr, 	0.f, 0.f, 0.f, 0.f},
-		{ Ct * sinf(_trim(4)),	 				 Ct * sinf(_trim(5)),					 Ct * sinf(_trim(6)),					 Ct * sinf(_trim(7)),					 Ct * _trim(0) *cosf(_trim(4)), 					     		     Ct * _trim(1) *cosf(_trim(5)),							 		Ct * _trim(2) *cosf(_trim(6)), 								 	Ct * _trim(3) *cosf(_trim(7)),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{-Py_0 * Ct*cosf(trim4_m) - Ct * Km * sinf(trim4_m),	-Py_1 * Ct*cosf(trim5_m) - Ct * Km * sinf(trim5_m),	 -Py_2 * Ct*cosf(trim6_m) + Ct * Km * sinf(trim6_m),	-Py_3 * Ct*cosf(trim7_m) + Ct * Km * sinf(trim7_m),	 Py_0 * Ct*_trim(0) *sinf(trim4_m) - Ct * Km * _trim(0) *cosf(trim4_m),    	     Py_1 * Ct*_trim(1) *sinf(trim5_m) - Ct * Km * _trim(1) *cosf(trim5_m),		 		Py_2 * Ct*_trim(2) *sinf(trim6_m) + Ct * Km * _trim(2) *cosf(trim6_m),		         	Py_3 * Ct*_trim(3) *sinf(trim7_m) + Ct * Km * _trim(3) *cosf(trim7_m),  			-q_bar*S*b*Cla,		 q_bar*S*b*Cla,		 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{ Ct*(Px_0 * cosf(trim4_m) + Pz_0 * sinf(trim4_m)),    Ct*(Px_1 * cosf(trim5_m) + Pz_1 * sinf(trim5_m)),	  Ct*(Px_2 * cosf(trim6_m) + Pz_2 * sinf(trim6_m)),	 Ct*(Px_3 * cosf(trim7_m) + Pz_3 * sinf(trim7_m)),	 Ct*_trim(0) *(-Px_0 * sinf(trim4_m) + Pz_0 * cosf(trim4_m)), 	     		     Ct*_trim(1) *(-Px_1 *sinf(trim5_m) + Pz_1 * cosf(trim5_m)),					Ct*_trim(2) *(-Px_2 *sinf(trim6_m) + Pz_2 * cosf(trim6_m)),					Ct*_trim(3) *(-Px_3 *sinf(trim7_m) + Pz_3 *cosf(trim7_m)),  					 0.f, 		 	 0.f, 		 	 q_bar*S*c_bar*Cme,		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{-Py_0 * Ct*sinf(trim4_m) + Ct * Km * cosf(trim4_m),	-Py_1 * Ct*sinf(trim5_m) + Ct * Km * cosf(trim5_m),	 -Py_2 * Ct*sinf(trim6_m) - Ct * Km * cosf(trim6_m),	-Py_3 * Ct*sinf(trim7_m) - Ct * Km * cosf(trim7_m),	-Py_0 * Ct*_trim(0) *cosf(trim4_m) - Ct * Km * _trim(0) *sinf(trim4_m),   	     -Py_1 * Ct*_trim(1) *cosf(trim5_m) - Ct * Km * _trim(1) *sinf(trim5_m),			-Py_2 * Ct*_trim(2) *cosf(trim6_m) + Ct * Km * _trim(2) *sinf(trim6_m), 		-Py_3 * Ct*_trim(3) *cosf(trim7_m) + Ct * Km * _trim(3) *sinf(trim7_m),  			 0.f, 		 	 0.f, 		 	 0.f, 		 		 q_bar*S*b*Cnr, 	0.f, 0.f, 0.f, 0.f},
+		{ Ct * sinf(trim4_m),	 				 Ct * sinf(trim5_m),					 Ct * sinf(trim6_m),					 Ct * sinf(trim7_m),					 Ct * _trim(0) *cosf(trim4_m), 					     		     Ct * _trim(1) *cosf(trim5_m),							 		Ct * _trim(2) *cosf(trim6_m), 								 	Ct * _trim(3) *cosf(trim7_m),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
 		{ 0.f,  			 			 0.f,  							 0.f,  							 0.f,	 						 0.f,		 		  					     		     0.f, 			      							 		0.f, 			    	  								 0.f, 			           								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
-		{-Ct * cosf(_trim(4)),	 			        -Ct * cosf(_trim(5)),					-Ct * cosf(_trim(6)),					-Ct * cosf(_trim(7)),					 Ct * _trim(0) *sinf(_trim(4)), 					     		     Ct * _trim(1) *sinf(_trim(5)),							 		Ct * _trim(2) *sinf(_trim(6)), 								 	Ct * _trim(3) *sinf(_trim(7)),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f}
+		{-Ct * cosf(trim4_m),	 			        -Ct * cosf(trim5_m),					-Ct * cosf(trim6_m),					-Ct * cosf(trim7_m),					 Ct * _trim(0) *sinf(trim4_m), 					     		     Ct * _trim(1) *sinf(trim5_m),							 		Ct * _trim(2) *sinf(trim6_m), 								 	Ct * _trim(3) *sinf(trim7_m),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f}
 	};
 	matrix = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS>(tiltrotor_vtol);
 
