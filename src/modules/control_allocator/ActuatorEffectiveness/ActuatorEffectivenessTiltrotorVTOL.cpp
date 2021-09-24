@@ -65,7 +65,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 		}
 
 	case FlightPhase::FORWARD_FLIGHT: {
-			tilt = 1.0;
+			tilt = 0.65;
 			airspeed = 20.0f;
 			break;
 		}

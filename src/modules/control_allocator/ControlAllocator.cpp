@@ -282,7 +282,7 @@ ControlAllocator::Run()
 
 		} else {
 			flight_phase = ActuatorEffectiveness::FlightPhase::FORWARD_FLIGHT;
-			PX4_INFO("Current flight phase = forward flight");
+			PX4_ERR("Current flight phase = forward flight");
 			//print_status();
 		}
 
