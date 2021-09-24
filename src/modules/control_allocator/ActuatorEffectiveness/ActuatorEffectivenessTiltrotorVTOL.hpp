@@ -42,6 +42,25 @@
 #pragma once
 
 #include "ActuatorEffectiveness.hpp"
+#include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionCallback.hpp>
+#include <uORB/topics/actuator_controls.h>
+#include <uORB/topics/airspeed_validated.h>
+#include <uORB/topics/manual_control_switches.h>
+#include <uORB/topics/parameter_update.h>
+#include <uORB/topics/position_setpoint_triplet.h>
+#include <uORB/topics/tecs_status.h>
+#include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/vehicle_attitude_setpoint.h>
+#include <uORB/topics/vehicle_command.h>
+#include <uORB/topics/vehicle_command_ack.h>
+#include <uORB/topics/vehicle_control_mode.h>
+#include <uORB/topics/vehicle_land_detected.h>
+#include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/vtol_vehicle_status.h>
+#include <uORB/topics/vehicle_status.h>
 
 class ActuatorEffectivenessTiltrotorVTOL: public ActuatorEffectiveness
 {
@@ -59,6 +78,12 @@ public:
 	void setFlightPhase(const FlightPhase &flight_phase) override;
 
 	int numActuators() const override { return 11; }
+	struct airspeed_validated_s 			*get_airspeed() {return &_airspeed_validated;}
+private:
+	airspeed_validated_s 				_airspeed_validated{};
+	vtol_vehicle_status_s _vtol_vehicle_status {};
+	uORB::Subscription _airspeed_validated_sub{ORB_ID(airspeed_validated)};
+	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
 protected:
 	bool _updated{true};
 };

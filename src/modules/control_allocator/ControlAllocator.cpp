@@ -349,7 +349,7 @@ ControlAllocator::Run()
 		if (_flag_trans) {
 			// for(size_t k = 0; k < 6; k++){
 			// 	PX4_INFO("wrench %zu = %f", k, double(c(k)));}
-			PX4_INFO("wrench = %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(c(0)), double(c(1)), double(c(2)), double(c(3)), double(c(4)), double(c(5)));
+			// PX4_INFO("wrench = %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(c(0)), double(c(1)), double(c(2)), double(c(3)), double(c(4)), double(c(5)));
 				}
 
 		_control_allocation->setControlSetpoint(c);
@@ -491,7 +491,7 @@ ControlAllocator::publish_legacy_actuator_controls()
 		//actuator_controls_4.control[4] = 0.35f;
 		//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i))*1000000));
 		//PX4_INFO("titls_raw =  %.4f, %.4f, %.4f, %.4f", double(actuator_sp(4)), double(actuator_sp(5)),double(actuator_sp(6)),double(actuator_sp(7)));
-		PX4_INFO("Group 4 =  %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(actuator_controls_4.control[0]),double(actuator_controls_4.control[1]),double(actuator_controls_4.control[2]),double(actuator_controls_4.control[3]),double(actuator_controls_4.control[4]),double(actuator_controls_4.control[5]),double(actuator_controls_4.control[6]),double(actuator_controls_4.control[7]));
+		// PX4_INFO("Group 4 =  %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(actuator_controls_4.control[0]),double(actuator_controls_4.control[1]),double(actuator_controls_4.control[2]),double(actuator_controls_4.control[3]),double(actuator_controls_4.control[4]),double(actuator_controls_4.control[5]),double(actuator_controls_4.control[6]),double(actuator_controls_4.control[7]));
 		//PX4_INFO("Group 5 =  %f, %f, %f, %f, %f, %f, %f, %f", double(actuator_controls_5.control[0]),double(actuator_controls_5.control[1]),double(actuator_controls_5.control[2]),double(actuator_controls_5.control[3]),double(actuator_controls_5.control[4]),double(actuator_controls_5.control[5]),double(actuator_controls_5.control[6]),double(actuator_controls_5.control[7]));
 	}
 	_actuator_controls_4_pub.publish(actuator_controls_4);

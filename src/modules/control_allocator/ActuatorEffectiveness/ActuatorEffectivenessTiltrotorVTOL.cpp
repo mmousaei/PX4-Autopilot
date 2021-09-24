@@ -79,6 +79,11 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	}
 
 	// Trim: half throttle, tilted motors
+	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+	_airspeed_validated_sub.update(&_airspeed_validated);
+
+	airspeed = float(_airspeed_validated.calibrated_airspeed_m_s);
+	tilt = float(_vtol_vehicle_status.tiltrotor_tilt);
 	_trim(0) = 0.5f;
 	_trim(1) = 0.5f;
 	_trim(2) = 0.5f;
@@ -87,6 +92,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	_trim(5) = tilt;
 	_trim(6) = tilt;
 	_trim(7) = tilt;
+	printf("alan injaaaaaaaaaaaaaaam  =  %f,  %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.tiltrotor_tilt));
 
 	float trim4_m = _trim(4)*1.570796f;
 	float trim5_m = _trim(5)*1.570796f;
