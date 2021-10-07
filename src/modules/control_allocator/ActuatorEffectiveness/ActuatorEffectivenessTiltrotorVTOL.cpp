@@ -79,15 +79,21 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	}
 
 	// Trim: half throttle, tilted motors
+	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+	_airspeed_validated_sub.update(&_airspeed_validated);
+
+	airspeed = float(_airspeed_validated.calibrated_airspeed_m_s);
+	if (_flight_phase == FlightPhase::FORWARD_FLIGHT){airspeed = 20.0f;}
+	tilt = float(_vtol_vehicle_status.tiltrotor_tilt);
 	_trim(0) = 0.5f;
 	_trim(1) = 0.5f;
 	_trim(2) = 0.5f;
 	_trim(3) = 0.5f;
-	_trim(4) = tilt;
-	_trim(5) = tilt;
-	_trim(6) = tilt;
-	_trim(7) = tilt;
-
+	_trim(4) = tilt;//*1.570796f;
+	_trim(5) = tilt;//*1.570796f;
+	_trim(6) = tilt;//*1.570796f;
+	_trim(7) = tilt;//*1.570796f;
+	printf("alan injaaaaaaaaaaaaaaam  =  %f,  %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.tiltrotor_tilt));
 	float trim4_m = _trim(4)*1.570796f;
 	float trim5_m = _trim(5)*1.570796f;
 	float trim6_m = _trim(6)*1.570796f;
@@ -133,7 +139,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float b = 2.0f;
 	float c_bar = 0.2f;
 	float Cla = 0.11730*0.1;
-	float Cme = 0.55604*0.1*0.5*0.5*0.5;
+	float Cme = 0.55604*0.1*0.5;//*0.5*0.5;
 	float Cnr = 0.0;//0.08810f;
 
 	// 			w_0							  w_1							w_2								w_3								theta_0									  theta_1										theta_2												theta_3								   delta_a left		   delta_a right	   delta_e			   delta_r

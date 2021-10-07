@@ -125,7 +125,7 @@ void Tiltrotor::update_vtol_state()
 	 * forward speed. After the vehicle has picked up enough speed the rotors are tilted
 	 * forward completely. For the backtransition the motors simply rotate back.
 	*/
-
+	_vtol_vehicle_status->tiltrotor_tilt = _tilt_control;
 	if (_vtol_vehicle_status->vtol_transition_failsafe) {
 		// Failsafe event, switch to MC mode immediately
 		_vtol_schedule.flight_mode = vtol_mode::MC_MODE;
@@ -386,15 +386,15 @@ void Tiltrotor::update_transition_state()
 		_mc_yaw_weight = 0.0f;
 
 		// ramp down motors not used in fixed-wing flight (setting MAX_PWM down scales the given output into the new range)
-		int ramp_down_value = (1.0f - time_since_trans_start / _params_tiltrotor.front_trans_dur_p2) *
-				      (PWM_DEFAULT_MAX - PWM_DEFAULT_MIN) + PWM_DEFAULT_MIN;
+		// int ramp_down_value = (1.0f - time_since_trans_start / _params_tiltrotor.front_trans_dur_p2) *
+		// 		      (PWM_DEFAULT_MAX - PWM_DEFAULT_MIN) + PWM_DEFAULT_MIN;
 
 
-		set_alternate_motor_state(motor_state::VALUE, ramp_down_value);
-
+		// set_alternate_motor_state(motor_state::VALUE, ramp_down_value);
+		float ramp_down_value = 1.0f - time_since_trans_start / _params_tiltrotor.front_trans_dur_p2;
 
 		_thrust_transition = -_mc_virtual_att_sp->thrust_body[2];
-		_v_att_sp->thrust_body[0] = _tilt_control;
+		_v_att_sp->thrust_body[0] = _tilt_control*ramp_down_value;//_fw_virtual_att_sp->thrust_body[0];
 		// in stabilized, acro or manual mode, set the MC thrust to the throttle stick position (coming from the FW attitude setpoint)
 		if (!_v_control_mode->flag_control_climb_rate_enabled) {
 			_v_att_sp->thrust_body[2] = -_fw_virtual_att_sp->thrust_body[0];

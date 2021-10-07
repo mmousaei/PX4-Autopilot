@@ -70,7 +70,8 @@ ControlAllocationPseudoInverse::allocate()
 
 	//printf("actuator_trim = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_trim(0)),double(_actuator_trim(1)),double(_actuator_trim(2)),double(_actuator_trim(3)),double(_actuator_trim(4)),double(_actuator_trim(5)),double(_actuator_trim(6)), double(_actuator_trim(7)));
 	//printf("control_sp = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f\n", double(_control_sp(0)),double(_control_sp(1)),double(_control_sp(2)),double(_control_sp(3)),double(_control_sp(4)),double(_control_sp(5)));
-	printf("_actuator_sp = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_sp(0)),double(_actuator_sp(1)),double(_actuator_sp(2)),double(_actuator_sp(3)),double(_actuator_sp(4)),double(_actuator_sp(5)),double(_actuator_sp(6)), double(_actuator_sp(7)));
+	printf("_actuator_sp4 = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_sp(0)),double(_actuator_sp(1)),double(_actuator_sp(2)),double(_actuator_sp(3)),double(_actuator_sp(4)),double(_actuator_sp(5)),double(_actuator_sp(6)), double(_actuator_sp(7)));
+	//printf("_actuator_sp5 = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_sp(8)),double(_actuator_sp(9)),double(_actuator_sp(10)),double(_actuator_sp(11)),double(_actuator_sp(12)),double(_actuator_sp(13)),double(_actuator_sp(14)), double(_actuator_sp(15)));
 	// Clip
 	clipActuatorSetpoint(_actuator_sp);
 
