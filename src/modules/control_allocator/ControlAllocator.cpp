@@ -56,6 +56,7 @@ ControlAllocator::ControlAllocator() :
 {
 	parameters_updated();
 	_flag_trans = false;
+	_flag_fw = false;
 }
 
 ControlAllocator::~ControlAllocator()
@@ -276,12 +277,14 @@ ControlAllocator::Run()
 		// Check if the current flight phase is HOVER or FIXED_WING
 		if (vehicle_status.vehicle_type == vehicle_status_s::VEHICLE_TYPE_ROTARY_WING) {
 			_flag_trans = false;
+			_flag_fw = false;
 			flight_phase = ActuatorEffectiveness::FlightPhase::HOVER_FLIGHT;
 			// PX4_ERR("Current flight phase = hover flight");
 			//print_status();
 
 		} else {
 			flight_phase = ActuatorEffectiveness::FlightPhase::FORWARD_FLIGHT;
+			_flag_fw = true;
 			PX4_ERR("Current flight phase = forward flight");
 			//print_status();
 		}
@@ -439,7 +442,9 @@ ControlAllocator::publish_control_allocator_status()
 			unallocated_control(2)).norm_squared() < 1e-6f);
 	control_allocator_status.thrust_setpoint_achieved = (Vector3f(unallocated_control(3), unallocated_control(4),
 			unallocated_control(5)).norm_squared() < 1e-6f);
-
+	if(_flag_fw) {
+		if (!control_allocator_status.torque_setpoint_achieved || !control_allocator_status.thrust_setpoint_achieved){PX4_ERR("Allocation Not Completed!");}
+	}
 	// Actuator saturation
 	const matrix::Vector<float, NUM_ACTUATORS> &actuator_sp = _control_allocation->getActuatorSetpoint();
 	const matrix::Vector<float, NUM_ACTUATORS> &actuator_min = _control_allocation->getActuatorMin();

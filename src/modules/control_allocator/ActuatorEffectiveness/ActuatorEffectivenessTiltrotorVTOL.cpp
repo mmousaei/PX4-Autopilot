@@ -83,7 +83,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	_airspeed_validated_sub.update(&_airspeed_validated);
 
 	airspeed = float(_airspeed_validated.calibrated_airspeed_m_s);
-	if (_flight_phase == FlightPhase::FORWARD_FLIGHT){airspeed = 20.0f;}
+	//if (_flight_phase == FlightPhase::FORWARD_FLIGHT){airspeed = 20.0f;}
 	tilt = float(_vtol_vehicle_status.tiltrotor_tilt);
 	_trim(0) = 0.5f;
 	_trim(1) = 0.5f;

@@ -129,6 +129,7 @@ private:
 		TILTROTOR_VTOL = 2,
 	};
 	bool _flag_trans{false};
+	bool _flag_fw{false};
 	EffectivenessSource _effectiveness_source_id{EffectivenessSource::NONE};
 	ActuatorEffectiveness *_actuator_effectiveness{nullptr}; 	///< class providing actuator effectiveness
 

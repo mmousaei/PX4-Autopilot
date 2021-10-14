@@ -197,10 +197,16 @@ void Tiltrotor::update_vtol_state()
 				if (time_since_trans_start > _params->front_trans_time_min) {
 					if (airspeed_triggers_transition) {
 						transition_to_p2 = _airspeed_validated->calibrated_airspeed_m_s >= _params->transition_airspeed;
+						if (transition_to_p2)
+						{PX4_ERR("Airspeed criteria satisfied!!!!!!!!!!!!!!!!!!");
+						PX4_ERR("Current airspeed = %f", double(_airspeed_validated->calibrated_airspeed_m_s));
+						PX4_ERR("Airspeed sp = %f", double(_params->transition_airspeed));}
 
 					} else {
 						transition_to_p2 = _tilt_control >= _params_tiltrotor.tilt_transition &&
-								   time_since_trans_start > _params->front_trans_time_openloop;;
+								   time_since_trans_start > _params->front_trans_time_openloop;
+						if (transition_to_p2){
+						PX4_ERR("Transition tilt criteria satisfied!!!!!!!!!!!!!!!!!!");}
 					}
 				}
 
@@ -214,16 +220,19 @@ void Tiltrotor::update_vtol_state()
 				break;
 			}
 
-		case vtol_mode::TRANSITION_FRONT_P2:
-
+		case vtol_mode::TRANSITION_FRONT_P2: {
+			const bool airspeed_triggers_transition = PX4_ISFINITE(_airspeed_validated->calibrated_airspeed_m_s)
+					&& !_params->airspeed_disabled;
+			bool airspeed_valid = false;
+			airspeed_valid = _airspeed_validated->calibrated_airspeed_m_s >= _params->transition_airspeed;
 			// if the rotors have been tilted completely we switch to fw mode
-			if (_tilt_control >= _params_tiltrotor.tilt_fw) {
+			if (_tilt_control >= _params_tiltrotor.tilt_fw && airspeed_triggers_transition && airspeed_valid) {
 				_vtol_schedule.flight_mode = vtol_mode::FW_MODE;
 				_tilt_control = _params_tiltrotor.tilt_fw;
 			}
 
 			break;
-
+		}
 		case vtol_mode::TRANSITION_BACK:
 			// failsafe into fixed wing mode
 			_vtol_schedule.flight_mode = vtol_mode::FW_MODE;
@@ -377,6 +386,7 @@ void Tiltrotor::update_transition_state()
 		}
 
 	} else if (_vtol_schedule.flight_mode == vtol_mode::TRANSITION_FRONT_P2) {
+		PX4_ERR("TRANSITION_FRONT_p2");
 		// the plane is ready to go into fixed wing mode, tilt the rotors forward completely
 		_tilt_control = _params_tiltrotor.tilt_transition +
 				fabsf(_params_tiltrotor.tilt_fw - _params_tiltrotor.tilt_transition) * time_since_trans_start /
