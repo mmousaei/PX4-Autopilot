@@ -67,27 +67,29 @@ ControlAllocationPseudoInverse::allocate()
 	updatePseudoInverse();
 
 	// Allocate
-	// _actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
+	_actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
 
 	 // ADDED
 	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
-	float tilt = _actuator_trim_known(0);
-	// printf("tilt = %f\n", double(tilt));
-	const float Tilt[4] = {tilt, tilt, tilt, tilt};
-	_actuator_known_sp = matrix::Vector<float, 4>(Tilt);
+	float tilt = float(_vtol_vehicle_status.tiltrotor_tilt);
+	const float Tilt[NUM_ACTUATORS] = {0.0f,0.0f,0.0f,0.0f, tilt, tilt, tilt, tilt, 0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+	_actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(Tilt);
 	_control_known_sp = _effectiveness_known * _actuator_known_sp;
 	_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
 	
 	const float act_sp[NUM_ACTUATORS] = {_actuator_unknown_sp(0), _actuator_unknown_sp(1), _actuator_unknown_sp(2), _actuator_unknown_sp(3), _actuator_known_sp(0), _actuator_known_sp(1), _actuator_known_sp(2), _actuator_known_sp(3), _actuator_unknown_sp(4), _actuator_unknown_sp(5), _actuator_unknown_sp(6), _actuator_unknown_sp(7), 0.0f, 0.0f, 0.0f, 0.0f};
 	
-	_actuator_sp = matrix::Vector<float, NUM_ACTUATORS>(act_sp);
+	_actuator_sp_uk = matrix::Vector<float, NUM_ACTUATORS>(act_sp);
 	// ADDED
-	// printf("_actuator_sp:\n");
-	// _actuator_sp.T().print();
-
-
-
-
+	
+	//printf("actuator_trim = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_trim(0)),double(_actuator_trim(1)),double(_actuator_trim(2)),double(_actuator_trim(3)),double(_actuator_trim(4)),double(_actuator_trim(5)),double(_actuator_trim(6)), double(_actuator_trim(7)));
+	//printf("control_sp = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f\n", double(_control_sp(0)),double(_control_sp(1)),double(_control_sp(2)),double(_control_sp(3)),double(_control_sp(4)),double(_control_sp(5)));
+	// printf("_control_known_sp = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f\n", double(_control_known_sp(0)),double(_control_known_sp(1)),double(_control_known_sp(2)),double(_control_known_sp(3)),double(_control_known_sp(4)),double(_control_known_sp(5)));
+	// printf("_control_trim_unknown = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f\n", double(_control_trim_unknown(0)),double(_control_trim_unknown(1)),double(_control_trim_unknown(2)),double(_control_trim_unknown(3)),double(_control_trim_unknown(4)),double(_control_trim_unknown(5)));
+	// printf("_control_trim = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f\n", double(_control_trim(0)),double(_control_trim(1)),double(_control_trim(2)),double(_control_trim(3)),double(_control_trim(4)),double(_control_trim(5)));
+	// printf("_actuator_known_sp = %.3f, %.3f, %.3f,%.3f\n", double(_actuator_known_sp(0)),double(_actuator_known_sp(1)),double(_actuator_known_sp(2)),double(_actuator_known_sp(3)));
+	// printf("_actuator_sp = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_sp(0)),double(_actuator_sp(1)),double(_actuator_sp(2)),double(_actuator_sp(3)),double(_actuator_sp(4)),double(_actuator_sp(5)),double(_actuator_sp(6)), double(_actuator_sp(7)));
+	// printf("_actuator_sp_uk = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n\n\n\n", double(_actuator_sp_uk(0)),double(_actuator_sp_uk(1)),double(_actuator_sp_uk(2)),double(_actuator_sp_uk(3)),double(_actuator_sp_uk(4)),double(_actuator_sp_uk(5)),double(_actuator_sp_uk(6)), double(_actuator_sp_uk(7)));
 	// Clip
 	clipActuatorSetpoint(_actuator_sp);
 
