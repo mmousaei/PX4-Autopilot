@@ -51,28 +51,34 @@ ControlAllocation::setEffectivenessMatrix(
 	clipActuatorSetpoint(_actuator_trim);
 	_control_trim = _effectiveness * _actuator_trim;
 	// ADDED
-	const float act_trim_k [NUM_ACTUATORS] = {0.0f,0.0f,0.0f,0.0f,_actuator_trim(4), _actuator_trim(5), _actuator_trim(6), _actuator_trim(7), 0.0f,0.0f,0.0f,0.0f};
+	float act_trim_k [NUM_ACTUATORS];
+	int ind = 0;
+	for(int i = 0; i < NUM_ACTUATORS; ++i) {
+		if (i == known_ind[ind]) {
+			act_trim_k[i] = _actuator_trim(i);
+			ind++;
+		}
+		else {
+			act_trim_k[i] = 0.0f;
+		}
+	}
 	_actuator_trim_known = matrix::Vector<float, NUM_ACTUATORS>(act_trim_k);
-	const float act_trim_uk [NUM_ACTUATORS] = {_actuator_trim(0), _actuator_trim(1), _actuator_trim(2), _actuator_trim(3), 0.0f,0.0f,0.0f,0.0f,_actuator_trim(8), _actuator_trim(9), _actuator_trim(10), _actuator_trim(11)};
-	_actuator_trim_unknown = matrix::Vector<float, NUM_ACTUATORS>(act_trim_uk);
-	const float eff_known[NUM_AXES][NUM_ACTUATORS] = {
-										{0.0f,0.0f,0.0f,0.0f,_effectiveness(0, 4), _effectiveness(0, 5), _effectiveness(0, 6), _effectiveness(0, 7),0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f},
-										{0.0f,0.0f,0.0f,0.0f,_effectiveness(1, 4), _effectiveness(1, 5), _effectiveness(1, 6), _effectiveness(1, 7),0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f},
-										{0.0f,0.0f,0.0f,0.0f,_effectiveness(2, 4), _effectiveness(2, 5), _effectiveness(2, 6), _effectiveness(2, 7),0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f},
-										{0.0f,0.0f,0.0f,0.0f,_effectiveness(3, 4), _effectiveness(3, 5), _effectiveness(3, 6), _effectiveness(3, 7),0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f},
-										{0.0f,0.0f,0.0f,0.0f,_effectiveness(4, 4), _effectiveness(4, 5), _effectiveness(4, 6), _effectiveness(4, 7),0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f},
-										{0.0f,0.0f,0.0f,0.0f,_effectiveness(5, 4), _effectiveness(5, 5), _effectiveness(5, 6), _effectiveness(5, 7),0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f}
-									};
+	_actuator_trim_unknown = _actuator_trim - _actuator_trim_known;
+	float eff_known[NUM_AXES][NUM_ACTUATORS];
+	for (int j = 0; j < NUM_AXES; ++j) {
+		ind = 0;
+		for(int i = 0; i < NUM_ACTUATORS; ++i) {
+			if(i == known_ind[ind]) {
+				eff_known[j][i] = _effectiveness(j, i);
+				ind++;
+			}
+			else {
+				eff_known[j][i] = 0.0f;
+			}
+		}
+	}
 	_effectiveness_known = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> (eff_known);
-	const float eff_unknown[NUM_AXES][NUM_ACTUATORS] = {
-										{_effectiveness(0, 0), _effectiveness(0, 1), _effectiveness(0, 2), _effectiveness(0, 3),0.0f,0.0f,0.0f,0.0f, _effectiveness(0, 8), _effectiveness(0, 9), _effectiveness(0, 10), _effectiveness(0, 11),0.0f,0.0f,0.0f,0.0f},
-										{_effectiveness(1, 0), _effectiveness(1, 1), _effectiveness(1, 2), _effectiveness(1, 3),0.0f,0.0f,0.0f,0.0f, _effectiveness(1, 8), _effectiveness(1, 9), _effectiveness(1, 10), _effectiveness(1, 11),0.0f,0.0f,0.0f,0.0f},
-										{_effectiveness(2, 0), _effectiveness(2, 1), _effectiveness(2, 2), _effectiveness(2, 3),0.0f,0.0f,0.0f,0.0f, _effectiveness(2, 8), _effectiveness(2, 9), _effectiveness(2, 10), _effectiveness(2, 11),0.0f,0.0f,0.0f,0.0f},
-										{_effectiveness(3, 0), _effectiveness(3, 1), _effectiveness(3, 2), _effectiveness(3, 3),0.0f,0.0f,0.0f,0.0f, _effectiveness(3, 8), _effectiveness(3, 9), _effectiveness(3, 10), _effectiveness(3, 11),0.0f,0.0f,0.0f,0.0f},
-										{_effectiveness(4, 0), _effectiveness(4, 1), _effectiveness(4, 2), _effectiveness(4, 3),0.0f,0.0f,0.0f,0.0f, _effectiveness(4, 8), _effectiveness(4, 9), _effectiveness(4, 10), _effectiveness(4, 11),0.0f,0.0f,0.0f,0.0f},
-										{_effectiveness(5, 0), _effectiveness(5, 1), _effectiveness(5, 2), _effectiveness(5, 3),0.0f,0.0f,0.0f,0.0f, _effectiveness(5, 8), _effectiveness(5, 9), _effectiveness(5, 10), _effectiveness(5, 11),0.0f,0.0f,0.0f,0.0f}
-									};
-	_effectiveness_unknown = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> (eff_unknown);
+	_effectiveness_unknown = _effectiveness - _effectiveness_known;
 	
 	_control_trim_known = _effectiveness_known * _actuator_trim_known;
 	_control_trim_unknown = _effectiveness_unknown * _actuator_trim_unknown;
@@ -91,12 +97,12 @@ ControlAllocation::setEffectivenessMatrix(
 	// printf("_actuator_trim:\n");
 	// _actuator_trim.T().print();
 
-	// printf("_effectiveness_known:\n");
-	// _effectiveness_known.print();
-	// printf("_effectiveness_unknown:\n");
-	// _effectiveness_unknown.print();
-	// printf("_effectiveness:\n");
-	// _effectiveness.print();
+	printf("_effectiveness_known:\n");
+	_effectiveness_known.print();
+	printf("_effectiveness_unknown:\n");
+	_effectiveness_unknown.print();
+	printf("_effectiveness:\n");
+	_effectiveness.print();
 
 	
 

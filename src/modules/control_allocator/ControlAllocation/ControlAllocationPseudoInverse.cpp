@@ -72,8 +72,8 @@ ControlAllocationPseudoInverse::allocate()
 	 // ADDED
 	// _vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
 	float tilt = _actuator_trim_known(4);
-	printf("tilt = %f\n", double(tilt));
-	const float Tilt[NUM_ACTUATORS] = {0.0f,0.0f,0.0f,0.0f,tilt, tilt, tilt, tilt,0.0f,0.0f,0.0f,0.0f};
+	// printf("tilt = %f\n", double(tilt));
+	float Tilt[NUM_ACTUATORS] = {0.0f,0.0f,0.0f,0.0f,tilt, tilt, tilt, tilt,0.0f,0.0f,0.0f,0.0f};
 	_actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(Tilt);
 	_control_known_sp = _effectiveness_known * _actuator_known_sp;
 	_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);

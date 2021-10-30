@@ -232,6 +232,8 @@ protected:
 	matrix::Vector<float, NUM_AXES> _control_allocated_unknown;     //< Allocated control
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_unknown_sp;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_known_sp;  	//< Actuator setpoint
+	int known_ind[NUM_KNOWN] = {4, 5, 6, 7};
+	float known_val[NUM_KNOWN];
 
 	// ADDED
 	int _num_actuators{0};
