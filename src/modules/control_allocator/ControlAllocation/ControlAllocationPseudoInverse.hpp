@@ -68,8 +68,8 @@ private:
 protected:
 	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix;
 	// ADDED
-	matrix::Matrix<float, NUM_UNKNOWN, NUM_AXES> _mix_unknown;
-	matrix::Matrix<float, NUM_KNOWN, NUM_AXES> _mix_known;
+	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix_unknown;
+	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix_known;
 	// ADDED
 	bool _mix_update_needed{false};
 

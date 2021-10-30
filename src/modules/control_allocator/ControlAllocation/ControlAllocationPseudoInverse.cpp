@@ -70,20 +70,25 @@ ControlAllocationPseudoInverse::allocate()
 	// _actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
 
 	 // ADDED
-	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
-	float tilt = _actuator_trim_known(0);
-	// printf("tilt = %f\n", double(tilt));
-	const float Tilt[4] = {tilt, tilt, tilt, tilt};
-	_actuator_known_sp = matrix::Vector<float, 4>(Tilt);
+	// _vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+	float tilt = _actuator_trim_known(4);
+	printf("tilt = %f\n", double(tilt));
+	const float Tilt[NUM_ACTUATORS] = {0.0f,0.0f,0.0f,0.0f,tilt, tilt, tilt, tilt,0.0f,0.0f,0.0f,0.0f};
+	_actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(Tilt);
 	_control_known_sp = _effectiveness_known * _actuator_known_sp;
 	_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
 	
-	const float act_sp[NUM_ACTUATORS] = {_actuator_unknown_sp(0), _actuator_unknown_sp(1), _actuator_unknown_sp(2), _actuator_unknown_sp(3), _actuator_known_sp(0), _actuator_known_sp(1), _actuator_known_sp(2), _actuator_known_sp(3), _actuator_unknown_sp(4), _actuator_unknown_sp(5), _actuator_unknown_sp(6), _actuator_unknown_sp(7), 0.0f, 0.0f, 0.0f, 0.0f};
+	// const float act_sp[NUM_ACTUATORS] = _actuator_unknown_sp + _actuator_known_sp;
 	
-	_actuator_sp = matrix::Vector<float, NUM_ACTUATORS>(act_sp);
+	_actuator_sp = _actuator_unknown_sp + _actuator_known_sp;
 	// ADDED
 	// printf("_actuator_sp:\n");
 	// _actuator_sp.T().print();
+	// printf("_actuator_known_sp:\n");
+	// _actuator_known_sp.T().print();
+	// printf("_actuator_unknown_sp:\n");
+	// _actuator_unknown_sp.T().print();
+
 
 
 
