@@ -46,6 +46,11 @@
 #pragma once
 
 #include "ControlAllocation.hpp"
+#include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionCallback.hpp>
+#include <uORB/topics/vtol_vehicle_status.h>
+#include <uORB/topics/vehicle_status.h>
 
 class ControlAllocationPseudoInverse: public ControlAllocation
 {
@@ -57,9 +62,15 @@ public:
 	virtual void setEffectivenessMatrix(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &effectiveness,
 					    const matrix::Vector<float, NUM_ACTUATORS> &actuator_trim, int num_actuators) override;
 
+private:
+	vtol_vehicle_status_s _vtol_vehicle_status {};
+	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
 protected:
 	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix;
-
+	// ADDED
+	matrix::Matrix<float, NUM_UNKNOWN, NUM_AXES> _mix_unknown;
+	matrix::Matrix<float, NUM_KNOWN, NUM_AXES> _mix_known;
+	// ADDED
 	bool _mix_update_needed{false};
 
 	/**

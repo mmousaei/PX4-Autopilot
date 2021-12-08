@@ -139,7 +139,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float b = 2.0f;
 	float c_bar = 0.2f;
 	float Cla = 0.11730*0.1;
-	float Cme = 0.55604*0.1*0.5;//*0.5*0.5;
+	float Cme = 0.55604*0.1*0.5*0.5*0.5;
 	float Cnr = 0.0;//0.08810f;
 
 	// 			w_0							  w_1							w_2								w_3								theta_0									  theta_1										theta_2												theta_3								   delta_a left		   delta_a right	   delta_e			   delta_r

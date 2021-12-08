@@ -442,9 +442,9 @@ ControlAllocator::publish_control_allocator_status()
 			unallocated_control(2)).norm_squared() < 1e-6f);
 	control_allocator_status.thrust_setpoint_achieved = (Vector3f(unallocated_control(3), unallocated_control(4),
 			unallocated_control(5)).norm_squared() < 1e-6f);
-	if(_flag_fw) {
-		if (!control_allocator_status.torque_setpoint_achieved || !control_allocator_status.thrust_setpoint_achieved){PX4_ERR("Allocation Not Completed!");}
-	}
+	// if(_flag_fw) {
+	// 	if (!control_allocator_status.torque_setpoint_achieved || !control_allocator_status.thrust_setpoint_achieved){PX4_ERR("Allocation Not Completed!");}
+	// }
 	// Actuator saturation
 	const matrix::Vector<float, NUM_ACTUATORS> &actuator_sp = _control_allocation->getActuatorSetpoint();
 	const matrix::Vector<float, NUM_ACTUATORS> &actuator_min = _control_allocation->getActuatorMin();
@@ -496,8 +496,8 @@ ControlAllocator::publish_legacy_actuator_controls()
 		//actuator_controls_4.control[4] = 0.35f;
 		//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i))*1000000));
 		//PX4_INFO("titls_raw =  %.4f, %.4f, %.4f, %.4f", double(actuator_sp(4)), double(actuator_sp(5)),double(actuator_sp(6)),double(actuator_sp(7)));
-		PX4_INFO("Group 4 =  %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(actuator_controls_4.control[0]),double(actuator_controls_4.control[1]),double(actuator_controls_4.control[2]),double(actuator_controls_4.control[3]),double(actuator_controls_4.control[4]),double(actuator_controls_4.control[5]),double(actuator_controls_4.control[6]),double(actuator_controls_4.control[7]));
-		PX4_INFO("Group 5 =  %f, %f, %f", double(actuator_controls_5.control[0]),double(actuator_controls_5.control[1]),double(actuator_controls_5.control[2]));
+		//PX4_INFO("Group 4 =  %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(actuator_controls_4.control[0]),double(actuator_controls_4.control[1]),double(actuator_controls_4.control[2]),double(actuator_controls_4.control[3]),double(actuator_controls_4.control[4]),double(actuator_controls_4.control[5]),double(actuator_controls_4.control[6]),double(actuator_controls_4.control[7]));
+		//PX4_INFO("Group 5 =  %f, %f, %f", double(actuator_controls_5.control[0]),double(actuator_controls_5.control[1]),double(actuator_controls_5.control[2]));
 	}
 	_actuator_controls_4_pub.publish(actuator_controls_4);
 	_actuator_controls_5_pub.publish(actuator_controls_5);

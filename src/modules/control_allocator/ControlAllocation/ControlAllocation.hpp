@@ -80,6 +80,8 @@ public:
 
 	static constexpr uint8_t NUM_ACTUATORS = 16;
 	static constexpr uint8_t NUM_AXES = 6;
+	static constexpr uint8_t NUM_KNOWN = 4;
+	static constexpr uint8_t NUM_UNKNOWN = 8;
 
 	typedef matrix::Vector<float, NUM_ACTUATORS> ActuatorVector;
 
@@ -212,8 +214,24 @@ protected:
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_min; 	//< Minimum actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_max; 	//< Maximum actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_sp;  	//< Actuator setpoint
+	matrix::Vector<float, NUM_ACTUATORS> _actuator_sp_uk;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_AXES> _control_sp;   		//< Control setpoint
 	matrix::Vector<float, NUM_AXES> _control_allocated;  	//< Allocated control
 	matrix::Vector<float, NUM_AXES> _control_trim;  	//< Control at trim actuator values
+	// ADDED
+	matrix::Matrix<float, NUM_AXES, NUM_UNKNOWN> _effectiveness_unknown;  //< Effectiveness matrix
+	matrix::Matrix<float, NUM_AXES, NUM_KNOWN> _effectiveness_known;  //< Effectiveness matrix
+	matrix::Vector<float, NUM_UNKNOWN> _actuator_trim_unknown;        //< Neutral actuator values
+	matrix::Vector<float, NUM_KNOWN> _actuator_trim_known;  //< Neutral actuator values
+	matrix::Vector<float, NUM_AXES> _control_trim_unknown;          //< Control at trim actuator values
+	matrix::Vector<float, NUM_AXES> _control_trim_known;    //< Control at trim actuator values
+	matrix::Vector<float, NUM_AXES> _control_known_sp;              //< Control setpoint
+	matrix::Vector<float, NUM_AXES> _control_unknown_sp;            //< Control setpoint
+	matrix::Vector<float, NUM_AXES> _control_allocated_known;       //< Allocated control
+	matrix::Vector<float, NUM_AXES> _control_allocated_unknown;     //< Allocated control
+	matrix::Vector<float, NUM_UNKNOWN> _actuator_unknown_sp;  	//< Actuator setpoint
+	matrix::Vector<float, NUM_KNOWN> _actuator_known_sp;  	//< Actuator setpoint
+
+	// ADDED
 	int _num_actuators{0};
 };

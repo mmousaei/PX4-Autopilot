@@ -193,10 +193,15 @@ void Tiltrotor::update_vtol_state()
 						&& !_params->airspeed_disabled;
 
 				bool transition_to_p2 = false;
+				bool transition_to_p2_airspeed = false;
+				bool transition_to_p2_tilt = false;
 
 				if (time_since_trans_start > _params->front_trans_time_min) {
 					if (airspeed_triggers_transition) {
-						transition_to_p2 = _airspeed_validated->calibrated_airspeed_m_s >= _params->transition_airspeed;
+						transition_to_p2_airspeed = _airspeed_validated->calibrated_airspeed_m_s >= _params->transition_airspeed;
+						transition_to_p2_tilt = _tilt_control >= _params_tiltrotor.tilt_transition &&
+								   time_since_trans_start > _params->front_trans_time_openloop;
+						transition_to_p2 = (transition_to_p2_airspeed && transition_to_p2_tilt);
 						if (transition_to_p2)
 						{PX4_ERR("Airspeed criteria satisfied!!!!!!!!!!!!!!!!!!");
 						PX4_ERR("Current airspeed = %f", double(_airspeed_validated->calibrated_airspeed_m_s));
