@@ -52,6 +52,7 @@ ActuatorEffectivenessStandardVTOL::getEffectivenessMatrix(matrix::Matrix<float, 
 	if (!_updated) {
 		return false;
 	}
+
 	float Tz = -6.5f;
 	float Tx = 6.5f; //6.5f;
 	float tau_x = 1.5925f; //1.5925f; //2.3198f;

@@ -67,23 +67,44 @@ ControlAllocationPseudoInverse::allocate()
 	updatePseudoInverse();
 
 	// Allocate
-	//_actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
-
+	if (_actuator_failure_id == 0) {
+	_actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
+	}
 	 // ADDED
-	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
-	float tilt = _actuator_trim_known(0);
-	// printf("tilt = %f\n", double(tilt));
-	const float Tilt[4] = {tilt, tilt, tilt, tilt};
-	_actuator_known_sp = matrix::Vector<float, 4>(Tilt);
+	// _vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+	// float tilt = _actuator_trim_known(0);
+	// // printf("tilt = %f\n", double(tilt));
+	// const float Tilt[4] = {tilt, tilt, tilt, tilt};
+	// _actuator_known_sp = matrix::Vector<float, 4>(Tilt);
+	// _control_known_sp = _effectiveness_known * _actuator_known_sp;
+	// _actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
+
+	// const float act_sp[NUM_ACTUATORS] = {_actuator_unknown_sp(0), _actuator_unknown_sp(1), _actuator_unknown_sp(2), _actuator_unknown_sp(3), _actuator_known_sp(0), _actuator_known_sp(1), _actuator_known_sp(2), _actuator_known_sp(3), _actuator_unknown_sp(4), _actuator_unknown_sp(5), _actuator_unknown_sp(6), _actuator_unknown_sp(7), 0.0f, 0.0f, 0.0f, 0.0f};
+
+	// _actuator_sp = matrix::Vector<float, NUM_ACTUATORS>(act_sp);
+	// standard vtol
+	else {
+	printf("actuator %d failed.", _actuator_failure_id);
+	const float Ale[1] = {0.0};
+	_actuator_known_sp = matrix::Vector<float, 1>(Ale);
 	_control_known_sp = _effectiveness_known * _actuator_known_sp;
 	_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
 
-	const float act_sp[NUM_ACTUATORS] = {_actuator_unknown_sp(0), _actuator_unknown_sp(1), _actuator_unknown_sp(2), _actuator_unknown_sp(3), _actuator_known_sp(0), _actuator_known_sp(1), _actuator_known_sp(2), _actuator_known_sp(3), _actuator_unknown_sp(4), _actuator_unknown_sp(5), _actuator_unknown_sp(6), _actuator_unknown_sp(7), 0.0f, 0.0f, 0.0f, 0.0f};
+	const float act_sp[NUM_ACTUATORS] = {_actuator_unknown_sp(0) + 0.5f, _actuator_unknown_sp(1) + 0.5f, _actuator_unknown_sp(2) + 0.5f, _actuator_unknown_sp(3) + 0.5f, _actuator_unknown_sp(4), _actuator_unknown_sp(5), _actuator_known_sp(0), _actuator_unknown_sp(6), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 	_actuator_sp = matrix::Vector<float, NUM_ACTUATORS>(act_sp);
+
+	// matrix::Vector<float, NUM_UNKNOWN> actuator_delta;
+	// actuator_delta = _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
+	// printf("quad trim =  \n");
+	// _actuator_trim_unknown.T().print();
+	// printf("actuator_delta = \n");
+	// actuator_delta.T().print();
+
+	}
 	// ADDED
 	printf("_actuator_sp:\n");
-	_actuator_sp.T().print();
+	 _actuator_sp.T().print();
 
 	//printf("actuator_trim = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", double(_actuator_trim(0)),double(_actuator_trim(1)),double(_actuator_trim(2)),double(_actuator_trim(3)),double(_actuator_trim(4)),double(_actuator_trim(5)),double(_actuator_trim(6)), double(_actuator_trim(7)));
 	//printf("control_sp = %.3f, %.3f, %.3f,%.3f,%.3f,%.3f\n", double(_control_sp(0)),double(_control_sp(1)),double(_control_sp(2)),double(_control_sp(3)),double(_control_sp(4)),double(_control_sp(5)));

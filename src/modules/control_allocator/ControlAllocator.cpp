@@ -136,6 +136,9 @@ ControlAllocator::parameters_updated()
 	actuator_max(14) = _param_ca_act14_max.get();
 	actuator_max(15) = _param_ca_act15_max.get();
 	_control_allocation->setActuatorMax(actuator_max);
+
+	param_vtol_failure = _param_vtol_failure.get();
+	_control_allocation->getActuatorFailure(param_vtol_failure);
 }
 
 void
@@ -349,11 +352,11 @@ ControlAllocator::Run()
 		c(3) = _thrust_sp(0);
 		c(4) = _thrust_sp(1);
 		c(5) = _thrust_sp(2);
-		if (_flag_trans) {
-			// for(size_t k = 0; k < 6; k++){
-			// 	PX4_INFO("wrench %zu = %f", k, double(c(k)));}
-			PX4_INFO("wrench = %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(c(0)), double(c(1)), double(c(2)), double(c(3)), double(c(4)), double(c(5)));
-				}
+		// if (_flag_trans) {
+		// 	// for(size_t k = 0; k < 6; k++){
+		// 	// 	PX4_INFO("wrench %zu = %f", k, double(c(k)));}
+		// 	PX4_INFO("wrench = %.4f, %.4f, %.4f, %.4f, %.4f, %.4f", double(c(0)), double(c(1)), double(c(2)), double(c(3)), double(c(4)), double(c(5)));
+		// 		}
 
 		_control_allocation->setControlSetpoint(c);
 

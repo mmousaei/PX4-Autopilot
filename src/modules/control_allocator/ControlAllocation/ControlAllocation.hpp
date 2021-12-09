@@ -80,8 +80,8 @@ public:
 
 	static constexpr uint8_t NUM_ACTUATORS = 16;
 	static constexpr uint8_t NUM_AXES = 6;
-	static constexpr uint8_t NUM_KNOWN = 4;
-	static constexpr uint8_t NUM_UNKNOWN = 8;
+	static constexpr uint8_t NUM_KNOWN = 1;
+	static constexpr uint8_t NUM_UNKNOWN = 7;
 
 	typedef matrix::Vector<float, NUM_ACTUATORS> ActuatorVector;
 
@@ -207,6 +207,7 @@ public:
 	virtual void updateParameters() {}
 
 	int numConfiguredActuators() const { return _num_actuators; }
+	void getActuatorFailure(int failure_id) { _actuator_failure_id = failure_id;}
 
 protected:
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> _effectiveness;  //< Effectiveness matrix
@@ -231,7 +232,7 @@ protected:
 	matrix::Vector<float, NUM_AXES> _control_allocated_unknown;     //< Allocated control
 	matrix::Vector<float, NUM_UNKNOWN> _actuator_unknown_sp;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_KNOWN> _actuator_known_sp;  	//< Actuator setpoint
-
+	int _actuator_failure_id;	//failed actuator id given from QGC
 	// ADDED
 	int _num_actuators{0};
 };

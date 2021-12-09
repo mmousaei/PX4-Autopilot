@@ -51,27 +51,70 @@ ControlAllocation::setEffectivenessMatrix(
 	clipActuatorSetpoint(_actuator_trim);
 	_control_trim = _effectiveness * _actuator_trim;
 	// ADDED
-	const float act_trim_k [NUM_KNOWN] = {_actuator_trim(4), _actuator_trim(5), _actuator_trim(6), _actuator_trim(7)};
+	//const float act_trim_k [NUM_KNOWN] = {_actuator_trim(4), _actuator_trim(5), _actuator_trim(6), _actuator_trim(7)};
+	//_actuator_trim_known = matrix::Vector<float, NUM_KNOWN>(act_trim_k);
+	//const float act_trim_uk [NUM_UNKNOWN] = {_actuator_trim(0), _actuator_trim(1), _actuator_trim(2), _actuator_trim(3), _actuator_trim(8), _actuator_trim(9), _actuator_trim(10), _actuator_trim(11)};
+	//_actuator_trim_unknown = matrix::Vector<float, NUM_UNKNOWN>(act_trim_uk);
+	// const float eff_known[NUM_AXES][NUM_KNOWN] = {
+	// 									{_effectiveness(0, 4), _effectiveness(0, 5), _effectiveness(0, 6), _effectiveness(0, 7)},
+	// 									{_effectiveness(1, 4), _effectiveness(1, 5), _effectiveness(1, 6), _effectiveness(1, 7)},
+	// 									{_effectiveness(2, 4), _effectiveness(2, 5), _effectiveness(2, 6), _effectiveness(2, 7)},
+	// 									{_effectiveness(3, 4), _effectiveness(3, 5), _effectiveness(3, 6), _effectiveness(3, 7)},
+	// 									{_effectiveness(4, 4), _effectiveness(4, 5), _effectiveness(4, 6), _effectiveness(4, 7)},
+	// 									{_effectiveness(5, 4), _effectiveness(5, 5), _effectiveness(5, 6), _effectiveness(5, 7)},
+	// 								};
+	// _effectiveness_known = matrix::Matrix<float, NUM_AXES, NUM_KNOWN> (eff_known);
+	// const float eff_unknown[NUM_AXES][NUM_UNKNOWN] = {
+	// 									{_effectiveness(0, 0), _effectiveness(0, 1), _effectiveness(0, 2), _effectiveness(0, 3), _effectiveness(0, 8), _effectiveness(0, 9), _effectiveness(0, 10), _effectiveness(0, 11)},
+	// 									{_effectiveness(1, 0), _effectiveness(1, 1), _effectiveness(1, 2), _effectiveness(1, 3), _effectiveness(1, 8), _effectiveness(1, 9), _effectiveness(1, 10), _effectiveness(1, 11)},
+	// 									{_effectiveness(2, 0), _effectiveness(2, 1), _effectiveness(2, 2), _effectiveness(2, 3), _effectiveness(2, 8), _effectiveness(2, 9), _effectiveness(2, 10), _effectiveness(2, 11)},
+	// 									{_effectiveness(3, 0), _effectiveness(3, 1), _effectiveness(3, 2), _effectiveness(3, 3), _effectiveness(3, 8), _effectiveness(3, 9), _effectiveness(3, 10), _effectiveness(3, 11)},
+	// 									{_effectiveness(4, 0), _effectiveness(4, 1), _effectiveness(4, 2), _effectiveness(4, 3), _effectiveness(4, 8), _effectiveness(4, 9), _effectiveness(4, 10), _effectiveness(4, 11)},
+	// 									{_effectiveness(5, 0), _effectiveness(5, 1), _effectiveness(5, 2), _effectiveness(5, 3), _effectiveness(5, 8), _effectiveness(5, 9), _effectiveness(5, 10), _effectiveness(5, 11)},
+	// 								};
+
+	float Tz = -6.5f;
+	float Tx = 6.5f; //6.5f;
+	float tau_x = 1.5925f; //1.5925f; //2.3198f;
+	//float tau_x2 = 1.5925f; //1.21875f; //2.3198f;
+	float tau_y = 0.98475; //0.98475; //2.3198f;
+	float tau_z = 0.325f;
+	float ale = 24.1014*0.1;
+	float ele = 114.2482*0.1*0.5*0.5*0.5;
+	float Tx_tran = Tx*0.5f;
+
+	const float standard_vtol_array[NUM_AXES][NUM_ACTUATORS] = {
+		{ -tau_x,  tau_x,  tau_x, -tau_x, 0.f, -ale, ale, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+		{  tau_y, -tau_y,  tau_y, -tau_y, 0.f, 0.f, 0.f, ele, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+		{  tau_z,  tau_z, -tau_z, -tau_z, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+		{  0.f,  0.f,  0.f, 0.f, Tx_tran, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+		{  0.f,  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
+		{Tz, Tz, Tz, Tz, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
+	};
+	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> standard_vtol;
+	standard_vtol = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS>(standard_vtol_array);
+	const float act_trim_k [NUM_KNOWN] = {_actuator_trim(6)};
 	_actuator_trim_known = matrix::Vector<float, NUM_KNOWN>(act_trim_k);
-	const float act_trim_uk [NUM_UNKNOWN] = {_actuator_trim(0), _actuator_trim(1), _actuator_trim(2), _actuator_trim(3), _actuator_trim(8), _actuator_trim(9), _actuator_trim(10), _actuator_trim(11)};
+	const float act_trim_uk [NUM_UNKNOWN] = {0.0, 0.0, 0.0, 0.0, _actuator_trim(4), _actuator_trim(5), _actuator_trim(7)};
 	_actuator_trim_unknown = matrix::Vector<float, NUM_UNKNOWN>(act_trim_uk);
 	const float eff_known[NUM_AXES][NUM_KNOWN] = {
-										{_effectiveness(0, 4), _effectiveness(0, 5), _effectiveness(0, 6), _effectiveness(0, 7)},
-										{_effectiveness(1, 4), _effectiveness(1, 5), _effectiveness(1, 6), _effectiveness(1, 7)},
-										{_effectiveness(2, 4), _effectiveness(2, 5), _effectiveness(2, 6), _effectiveness(2, 7)},
-										{_effectiveness(3, 4), _effectiveness(3, 5), _effectiveness(3, 6), _effectiveness(3, 7)},
-										{_effectiveness(4, 4), _effectiveness(4, 5), _effectiveness(4, 6), _effectiveness(4, 7)},
-										{_effectiveness(5, 4), _effectiveness(5, 5), _effectiveness(5, 6), _effectiveness(5, 7)},
+										{standard_vtol(0, 6)},
+										{standard_vtol(1, 6)},
+										{standard_vtol(2, 6)},
+										{standard_vtol(3, 6)},
+										{standard_vtol(4, 6)},
+										{standard_vtol(5, 6)},
 									};
 	_effectiveness_known = matrix::Matrix<float, NUM_AXES, NUM_KNOWN> (eff_known);
 	const float eff_unknown[NUM_AXES][NUM_UNKNOWN] = {
-										{_effectiveness(0, 0), _effectiveness(0, 1), _effectiveness(0, 2), _effectiveness(0, 3), _effectiveness(0, 8), _effectiveness(0, 9), _effectiveness(0, 10), _effectiveness(0, 11)},
-										{_effectiveness(1, 0), _effectiveness(1, 1), _effectiveness(1, 2), _effectiveness(1, 3), _effectiveness(1, 8), _effectiveness(1, 9), _effectiveness(1, 10), _effectiveness(1, 11)},
-										{_effectiveness(2, 0), _effectiveness(2, 1), _effectiveness(2, 2), _effectiveness(2, 3), _effectiveness(2, 8), _effectiveness(2, 9), _effectiveness(2, 10), _effectiveness(2, 11)},
-										{_effectiveness(3, 0), _effectiveness(3, 1), _effectiveness(3, 2), _effectiveness(3, 3), _effectiveness(3, 8), _effectiveness(3, 9), _effectiveness(3, 10), _effectiveness(3, 11)},
-										{_effectiveness(4, 0), _effectiveness(4, 1), _effectiveness(4, 2), _effectiveness(4, 3), _effectiveness(4, 8), _effectiveness(4, 9), _effectiveness(4, 10), _effectiveness(4, 11)},
-										{_effectiveness(5, 0), _effectiveness(5, 1), _effectiveness(5, 2), _effectiveness(5, 3), _effectiveness(5, 8), _effectiveness(5, 9), _effectiveness(5, 10), _effectiveness(5, 11)},
+										{standard_vtol(0, 0), standard_vtol(0, 1), standard_vtol(0, 2), standard_vtol(0, 3), standard_vtol(0, 4), standard_vtol(0, 5), standard_vtol(0, 7)},
+										{standard_vtol(1, 0), standard_vtol(1, 1), standard_vtol(1, 2), standard_vtol(1, 3), standard_vtol(1, 4), standard_vtol(1, 5), standard_vtol(1, 7)},
+										{standard_vtol(2, 0), standard_vtol(2, 1), standard_vtol(2, 2), standard_vtol(2, 3), standard_vtol(2, 4), standard_vtol(2, 5), standard_vtol(2, 7)},
+										{standard_vtol(3, 0), standard_vtol(3, 1), standard_vtol(3, 2), standard_vtol(3, 3), standard_vtol(3, 4), standard_vtol(3, 5), standard_vtol(3, 7)},
+										{standard_vtol(4, 0), standard_vtol(4, 1), standard_vtol(4, 2), standard_vtol(4, 3), standard_vtol(4, 4), standard_vtol(4, 5), standard_vtol(4, 7)},
+										{standard_vtol(5, 0), standard_vtol(5, 1), standard_vtol(5, 2), standard_vtol(5, 3), standard_vtol(5, 4), standard_vtol(5, 5), standard_vtol(5, 7)},
 									};
+
 	_effectiveness_unknown = matrix::Matrix<float, NUM_AXES, NUM_UNKNOWN> (eff_unknown);
 
 	_control_trim_known = _effectiveness_known * _actuator_trim_known;
