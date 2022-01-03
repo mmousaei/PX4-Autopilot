@@ -38,6 +38,22 @@ px4_add_library(ControlAllocation
 	ControlAllocationPseudoInverse.hpp
 	ControlAllocationSequentialDesaturation.cpp
 	ControlAllocationSequentialDesaturation.hpp
+	alglib-cpp/src/ap.cpp
+	alglib-cpp/src/linalg.cpp
+	alglib-cpp/src/alglibinternal.cpp
+	alglib-cpp/src/alglibmisc.cpp
+	alglib-cpp/src/dataanalysis.cpp
+	alglib-cpp/src/diffequations.cpp
+	alglib-cpp/src/fasttransforms.cpp
+	alglib-cpp/src/integration.cpp
+	alglib-cpp/src/interpolation.cpp
+	alglib-cpp/src/kernels_avx2.cpp
+	alglib-cpp/src/kernels_fma.cpp
+	alglib-cpp/src/kernels_sse2.cpp
+	alglib-cpp/src/optimization.cpp
+	alglib-cpp/src/solvers.cpp
+	alglib-cpp/src/specialfunctions.cpp
+	alglib-cpp/src/statistics.cpp
 )
 target_compile_options(ControlAllocation PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
 target_include_directories(ControlAllocation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -71,6 +71,9 @@
 
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/vehicle_actuator_setpoint.h>
+#include "alglib-cpp/src/ap.h"
+#include "alglib-cpp/src/linalg.h"
+#include "alglib-cpp/src/stdafx.h"
 
 class ControlAllocation
 {
@@ -204,6 +207,37 @@ public:
 	 */
 	matrix::Vector<float, NUM_ACTUATORS> normalizeActuatorSetpoint(const matrix::Vector<float, NUM_ACTUATORS> &actuator)
 	const;
+
+	/**
+	 * Author: Mohammad
+	 * Find the nullspace of the matrix
+	 *
+	 * @param m Input matrix
+	 *
+	 * @param nullspace Output nullspace of input m
+	 * @param nullsize Output nullspace sice of input m
+	 */
+	void getNullSpace(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m, matrix::Matrix<float, NUM_ACTUATORS, NUM_ACTUATORS> &nullspace, int &nullsize);
+
+	/**
+	 * Author: Mohammad
+	 * Convert from px4 matrix to alglib matrix
+	 *
+	 * @param m Input matrix
+	 *
+	 * @return Converted matrix
+	 */
+	alglib::real_2d_array matrixToAlglib(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m);
+
+	/**
+	 * Author: Mohammad
+	 * Convert from alglib matrix to px4 matrix
+	 *
+	 * @param m Input matrix
+	 *
+	 * @return Converted matrix
+	 */
+	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> alglibToMatrix(const alglib::real_2d_array &m);
 
 	virtual void updateParameters() {}
 

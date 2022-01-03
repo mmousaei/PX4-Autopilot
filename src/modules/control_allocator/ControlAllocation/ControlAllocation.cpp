@@ -46,7 +46,11 @@ ControlAllocation::setEffectivenessMatrix(
 	const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &effectiveness,
 	const matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator_trim, int num_actuators)
 {
+
 	_effectiveness = effectiveness;
+	int sz;
+	matrix::Matrix<float,ControlAllocation::NUM_ACTUATORS, ControlAllocation::NUM_ACTUATORS> null_space;
+	getNullSpace(effectiveness, null_space, sz);
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
 	_control_trim = _effectiveness * _actuator_trim;
@@ -79,10 +83,10 @@ ControlAllocation::setEffectivenessMatrix(
 	}
 	_effectiveness_known = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> (eff_known);
 	_effectiveness_unknown = _effectiveness - _effectiveness_known;
-	
+
 	_control_trim_known = _effectiveness_known * _actuator_trim_known;
 	_control_trim_unknown = _effectiveness_unknown * _actuator_trim_unknown;
-	
+
 	// printf("_control_trim:\n");
 	// _control_trim.print();
 	// printf("_control_trim_known:\n");
@@ -104,7 +108,7 @@ ControlAllocation::setEffectivenessMatrix(
 	printf("_effectiveness:\n");
 	_effectiveness.print();
 
-	
+
 
 
 
@@ -164,4 +168,76 @@ const
 	}
 
 	return actuator_normalized;
+}
+void
+ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &m, matrix::Matrix<float, ControlAllocation::NUM_ACTUATORS, ControlAllocation::NUM_ACTUATORS> &nullspace, int &nullsize)
+{
+	alglib::real_2d_array a = matrixToAlglib(m);
+	alglib::ae_int_t M = ControlAllocation::NUM_ACTUATORS - 4; // Number of actual actutors
+	alglib::ae_int_t N = ControlAllocation::NUM_AXES;
+	alglib::ae_int_t vtneeded = 1; // Determines if vt matrix is needed
+	alglib::ae_int_t uneeded = 0; // Determines if u matrix is needed
+	alglib::ae_int_t additionalmemory = 2; //If the parameter:
+                     			       // * equals 0, the algorithm doesn't use additional
+                       			       // memory (lower requirements, lower performance).
+		            		       // * equals 1, the algorithm uses additional
+		            		       // memory of size min(M,N)*min(M,N) of real numbers.
+		            		       // It often speeds up the algorithm.
+		            		       // * equals 2, the algorithm uses additional
+		            		       // memory of size M*min(M,N) of real numbers.
+		            		       // It allows to get a maximum performance.
+		            		       // The recommended value of the parameter is 2.
+	alglib::real_1d_array w;
+	alglib::real_2d_array vt;
+	alglib::real_2d_array u;
+	bool success = alglib::rmatrixsvd(a, M, N, uneeded, vtneeded, additionalmemory, w, u, vt);
+	int non_zero_eigens = 0;
+
+	printf("W = [ %f  %f  %f  %f  %f  %f ]\n", w(0), w(1), w(2), w(3), w(4), w(5));
+	if(success) {
+		for(int i = 0; i < ControlAllocation::NUM_AXES; ++i) {
+			if(w(i) < 0.001)
+			{
+				non_zero_eigens = i;
+			}
+		}
+	}
+	nullsize = ControlAllocation::NUM_ACTUATORS - non_zero_eigens;
+	printf("\n\non_zero_eigens = %d\n\n", non_zero_eigens);
+	printf("\n\nNullsize = %d\n\n", nullsize);
+	printf("Nullspace = \n [");
+	for(int i = 0; i < ControlAllocation::NUM_ACTUATORS - 4; ++i) {
+		for(int j = 0; j < nullsize; ++j) {
+			nullspace(i, j) = vt(j + non_zero_eigens, i);
+			// nullspace(i, j) = 1;
+			printf("%f,\t", nullspace(i,j));
+		}
+		printf("\n");
+	}
+	printf("]");
+}
+
+alglib::real_2d_array
+ControlAllocation::matrixToAlglib(const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &m)
+{
+	alglib::real_2d_array c;
+	c.setlength(ControlAllocation::NUM_ACTUATORS - 4, ControlAllocation::NUM_AXES);
+	for(int i = 0; i < ControlAllocation::NUM_AXES; ++i) {
+		for(int j = 0; j < ControlAllocation::NUM_ACTUATORS - 4; ++j) {
+			c(i, j) = m (i, j);
+		}
+	}
+	return c;
+}
+matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS>
+ControlAllocation::alglibToMatrix(const alglib::real_2d_array &m)
+{
+	matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> c;
+	for(int i = 0; i < ControlAllocation::NUM_AXES; ++i) {
+		for(int j = 0; j < ControlAllocation::NUM_ACTUATORS; ++j) {
+			if(j >= ControlAllocation::NUM_ACTUATORS + 4) c(i, j) = 0;
+			else c(i, j) = m (i, j);
+		}
+	}
+	return c;
 }
