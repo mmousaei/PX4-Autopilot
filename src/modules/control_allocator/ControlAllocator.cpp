@@ -135,7 +135,11 @@ ControlAllocator::parameters_updated()
 	actuator_max(14) = _param_ca_act14_max.get();
 	actuator_max(15) = _param_ca_act15_max.get();
 	_control_allocation->setActuatorMax(actuator_max);
+	param_vtol_failure = _param_vtol_failure.get();
+	_control_allocation->getActuatorFailure(param_vtol_failure);
+
 }
+
 
 void
 ControlAllocator::update_allocation_method()

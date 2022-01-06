@@ -77,9 +77,9 @@ ControlAllocationPseudoInverse::allocate()
 	_actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(Tilt);
 	_control_known_sp = _effectiveness_known * _actuator_known_sp;
 	_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
-	
+
 	// const float act_sp[NUM_ACTUATORS] = _actuator_unknown_sp + _actuator_known_sp;
-	
+
 	_actuator_sp = _actuator_unknown_sp + _actuator_known_sp;
 	// ADDED
 	// printf("_actuator_sp:\n");

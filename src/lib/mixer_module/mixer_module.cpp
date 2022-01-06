@@ -111,7 +111,7 @@ void MixingOutput::updateParams()
 		if (_param_mot_slew_max.get() <= FLT_EPSILON) {
 			_mixers->set_max_delta_out_once(0.f);
 		}
-
+		param_vtol_failure = _param_vtol_failure.get();
 		_mixers->set_thrust_factor(_param_thr_mdl_fac.get());
 		_mixers->set_airmode((Mixer::Airmode)_param_mc_airmode.get());
 	}
@@ -448,6 +448,11 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 	for (size_t i = 0; i < num_outputs; ++i) {
 		actuator_outputs.output[i] = _current_output_value[i];
 		//PX4_ERR("= %u\n",_current_output_value[i]);
+		if(int(i) == (param_vtol_failure-1))
+		{
+			if(i < 13 && i > 4) actuator_outputs.output[i] = 1500;
+			else if (i > 0 && i <= 4) actuator_outputs.output[i] = 900;
+		}
 	}
 
 	actuator_outputs.timestamp = hrt_absolute_time();

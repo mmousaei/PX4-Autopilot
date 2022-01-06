@@ -46,6 +46,25 @@ ControlAllocation::setEffectivenessMatrix(
 	const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &effectiveness,
 	const matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator_trim, int num_actuators)
 {
+	if (failed) {
+		printf("here1\n");
+		if(_actuator_failure_id >= 5 && _actuator_failure_id <= 8) {
+			printf("here2\n");
+			_actuator_trim(_actuator_failure_id) = 0;
+		}
+		else {
+			printf("here3: %d\n", _actuator_failure_id);
+			known_ind.push_back(_actuator_failure_id-1);
+			std::sort(known_ind.begin(), known_ind.end());
+			_actuator_trim(_actuator_failure_id-1) = 0;
+		}
+		failed = false;
+	}
+	printf("known_id = [");
+	for(int i = 0; i < int(known_ind.size()); ++i) {
+		printf("%d, ", known_ind[i]);
+	}
+	printf("]\n");
 	_effectiveness = effectiveness;
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
@@ -79,10 +98,10 @@ ControlAllocation::setEffectivenessMatrix(
 	}
 	_effectiveness_known = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> (eff_known);
 	_effectiveness_unknown = _effectiveness - _effectiveness_known;
-	
+
 	_control_trim_known = _effectiveness_known * _actuator_trim_known;
 	_control_trim_unknown = _effectiveness_unknown * _actuator_trim_unknown;
-	
+
 	// printf("_control_trim:\n");
 	// _control_trim.print();
 	// printf("_control_trim_known:\n");
@@ -99,12 +118,12 @@ ControlAllocation::setEffectivenessMatrix(
 
 	printf("_effectiveness_known:\n");
 	_effectiveness_known.print();
-	printf("_effectiveness_unknown:\n");
-	_effectiveness_unknown.print();
-	printf("_effectiveness:\n");
-	_effectiveness.print();
+	// printf("_effectiveness_unknown:\n");
+	// _effectiveness_unknown.print();
+	// printf("_effectiveness:\n");
+	// _effectiveness.print();
 
-	
+
 
 
 

@@ -71,6 +71,8 @@
 
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/vehicle_actuator_setpoint.h>
+#include <vector>
+#include <algorithm>
 
 class ControlAllocation
 {
@@ -204,10 +206,14 @@ public:
 	 */
 	matrix::Vector<float, NUM_ACTUATORS> normalizeActuatorSetpoint(const matrix::Vector<float, NUM_ACTUATORS> &actuator)
 	const;
-
+	bool failed = false;
 	virtual void updateParameters() {}
 
 	int numConfiguredActuators() const { return _num_actuators; }
+	void getActuatorFailure(int failure_id) {
+		_actuator_failure_id = failure_id;
+		if(_actuator_failure_id != 0) failed = true;
+	}
 
 protected:
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> _effectiveness;  //< Effectiveness matrix
@@ -232,8 +238,11 @@ protected:
 	matrix::Vector<float, NUM_AXES> _control_allocated_unknown;     //< Allocated control
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_unknown_sp;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_known_sp;  	//< Actuator setpoint
-	int known_ind[NUM_KNOWN] = {4, 5, 6, 7};
-	float known_val[NUM_KNOWN];
+	std::vector<int> known_ind{4, 5, 6, 7};
+
+	int _actuator_failure_id;	//failed actuator id given from QGC
+
+	// float known_val[NUM_KNOWN];
 
 	// ADDED
 	int _num_actuators{0};
