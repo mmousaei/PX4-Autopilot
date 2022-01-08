@@ -60,11 +60,11 @@ ControlAllocation::setEffectivenessMatrix(
 		}
 		failed = false;
 	}
-	printf("known_id = [");
-	for(int i = 0; i < int(known_ind.size()); ++i) {
-		printf("%d, ", known_ind[i]);
-	}
-	printf("]\n");
+	// printf("known_id = [");
+	// for(int i = 0; i < int(known_ind.size()); ++i) {
+	// 	printf("%d, ", known_ind[i]);
+	// }
+	// printf("]\n");
 	_effectiveness = effectiveness;
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
