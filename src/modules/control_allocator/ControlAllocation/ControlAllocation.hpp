@@ -238,7 +238,8 @@ protected:
 	matrix::Vector<float, NUM_AXES> _control_allocated_unknown;     //< Allocated control
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_unknown_sp;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_known_sp;  	//< Actuator setpoint
-	std::vector<int> known_ind{4, 5};
+	matrix::Vector<float, NUM_ACTUATORS> _actuator_unallocated_sp;  	//< Actuator setpoint
+	std::vector<int> known_ind{4, 5, 6, 7};
 
 	int _actuator_failure_id;	//failed actuator id given from QGC
 

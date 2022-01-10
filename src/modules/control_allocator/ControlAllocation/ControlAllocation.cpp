@@ -149,6 +149,7 @@ ControlAllocation::setActuatorSetpoint(
 	// Compute achieved control
 	_control_allocated = _effectiveness * _actuator_sp;
 
+
 }
 
 void

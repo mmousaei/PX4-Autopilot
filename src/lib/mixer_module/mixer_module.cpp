@@ -452,9 +452,10 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 		{
 			if(i < 13 && i > 4) actuator_outputs.output[i] = 1500;
 			else if (i > 0 && i <= 4) actuator_outputs.output[i] = 900;
+			if(i == 10) actuator_outputs.output[i] = 2000;
 		}
 	}
-
+	// printf("elevator value = %d\n", int(actuator_outputs.output[10]));
 	actuator_outputs.timestamp = hrt_absolute_time();
 	_outputs_pub.publish(actuator_outputs);
 }

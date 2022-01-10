@@ -90,8 +90,8 @@ ControlAllocationPseudoInverse::allocate()
 
 	_actuator_sp = _actuator_unknown_sp + _actuator_known_sp;
 	// ADDED
-	printf("_actuator_sp:\n");
-	_actuator_sp.T().print();
+	// printf("_actuator_sp:\n");
+	// _actuator_sp.T().print();
 	// printf("_actuator_known_sp:\n");
 	// _actuator_known_sp.T().print();
 	// printf("_actuator_unknown_sp:\n");
@@ -106,4 +106,15 @@ ControlAllocationPseudoInverse::allocate()
 
 	// Compute achieved control
 	_control_allocated = _effectiveness * _actuator_sp;
+	matrix::Vector<float, NUM_AXES> _control_unallocated;
+	_control_unallocated = (_control_sp - _control_allocated);
+	if (failed) {
+		if (_control_unallocated.norm() > 1) {
+			_actuator_unallocated_sp = _actuator_trim + _mix * _control_unallocated;
+			_actuator_sp += _actuator_unallocated_sp;
+			clipActuatorSetpoint(_actuator_sp);
+		}
+	}
+	// printf("un allocated = %f\n", double(_control_unallocated.norm()));
+
 }
