@@ -115,6 +115,13 @@ ControlAllocationPseudoInverse::allocate()
 			clipActuatorSetpoint(_actuator_sp);
 		}
 	}
+	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+	_airspeed_validated_sub.update(&_airspeed_validated);
+
+
+	cFile.open("myFile.csv", std::ios_base::app);
+	cFile << std::endl << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " << double(_airspeed_validated.calibrated_airspeed_m_s)<< ", " << double(_vtol_vehicle_status.tiltrotor_tilt) << std::endl;
+	cFile.close();
 	// printf("un allocated = %f\n", double(_control_unallocated.norm()));
 
 }

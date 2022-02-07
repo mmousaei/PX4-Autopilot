@@ -73,6 +73,13 @@
 #include <uORB/topics/vehicle_actuator_setpoint.h>
 #include <vector>
 #include <algorithm>
+#include <stdio.h>
+#include <fstream>
+#include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionCallback.hpp>
+#include <uORB/topics/vtol_vehicle_status.h>
+#include <uORB/topics/airspeed_validated.h>
 
 class ControlAllocation
 {
@@ -96,6 +103,8 @@ public:
 		THRUST_Y,
 		THRUST_Z
 	};
+	// FILE * cFile;
+	std::ofstream cFile;
 
 	/**
 	 * Allocate control setpoint to actuators
@@ -214,6 +223,11 @@ public:
 		_actuator_failure_id = failure_id;
 		if(_actuator_failure_id != 0) failed = true;
 	}
+
+	airspeed_validated_s 				_airspeed_validated{};
+	vtol_vehicle_status_s _vtol_vehicle_status {};
+	uORB::Subscription _airspeed_validated_sub{ORB_ID(airspeed_validated)};
+	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
 
 protected:
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> _effectiveness;  //< Effectiveness matrix

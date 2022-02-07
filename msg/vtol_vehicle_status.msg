@@ -14,3 +14,5 @@ bool vtol_transition_failsafe		# vtol in transition failsafe mode
 bool fw_permanent_stab			# In fw mode stabilize attitude even if in manual mode
 
 float32 tiltrotor_tilt
+float32 roll
+float32 pitch

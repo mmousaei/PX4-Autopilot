@@ -46,6 +46,7 @@ ControlAllocation::setEffectivenessMatrix(
 	const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &effectiveness,
 	const matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator_trim, int num_actuators)
 {
+
 	if (failed) {
 		printf("here1\n");
 		if(_actuator_failure_id >= 5 && _actuator_failure_id <= 8) {
@@ -116,12 +117,13 @@ ControlAllocation::setEffectivenessMatrix(
 	// printf("_actuator_trim:\n");
 	// _actuator_trim.T().print();
 
-	printf("_effectiveness_known:\n");
-	_effectiveness_known.print();
+	// printf("_effectiveness_known:\n");
+	// _effectiveness_known.print();
 	// printf("_effectiveness_unknown:\n");
 	// _effectiveness_unknown.print();
 	// printf("_effectiveness:\n");
 	// _effectiveness.print();
+
 
 
 
@@ -134,6 +136,9 @@ ControlAllocation::setEffectivenessMatrix(
 	for (int i = num_actuators; i < NUM_ACTUATORS; ++i) {
 		_actuator_sp(i) = _actuator_trim(i);
 	}
+	// fprintf(cFile, "%f, %f, %f, %f, %f, %f\n", double(_control_sp(0)), double(_control_sp(1)), double(_control_sp(2)), double(_control_sp(3)), double(_control_sp(4)), double(_control_sp(5)));
+	// fclose(cFile);
+
 }
 
 void

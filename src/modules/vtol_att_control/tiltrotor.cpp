@@ -126,6 +126,9 @@ void Tiltrotor::update_vtol_state()
 	 * forward completely. For the backtransition the motors simply rotate back.
 	*/
 	_vtol_vehicle_status->tiltrotor_tilt = _tilt_control;
+	_vtol_vehicle_status->roll = _v_att_sp->roll_body;
+	_vtol_vehicle_status->pitch = _v_att_sp->pitch_body;
+
 	if (_vtol_vehicle_status->vtol_transition_failsafe) {
 		// Failsafe event, switch to MC mode immediately
 		_vtol_schedule.flight_mode = vtol_mode::MC_MODE;

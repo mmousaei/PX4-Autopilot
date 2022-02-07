@@ -448,11 +448,15 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 	for (size_t i = 0; i < num_outputs; ++i) {
 		actuator_outputs.output[i] = _current_output_value[i];
 		//PX4_ERR("= %u\n",_current_output_value[i]);
+		// Nuetral points:
+		// Ailerons (8 & 9): 1500
+		// Elevator ( 10 ):  1650
 		if(int(i) == (param_vtol_failure-1))
 		{
 			if(i < 13 && i > 4) actuator_outputs.output[i] = 1500;
 			else if (i > 0 && i <= 4) actuator_outputs.output[i] = 900;
-			if(i == 10) actuator_outputs.output[i] = 2000;
+			if(i == 9) actuator_outputs.output[i] = 1550;
+			if (i > 4 && i <= 8) actuator_outputs.output[i] = 1600;
 		}
 	}
 	// printf("elevator value = %d\n", int(actuator_outputs.output[10]));
