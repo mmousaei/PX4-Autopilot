@@ -51,21 +51,21 @@ ControlAllocation::setEffectivenessMatrix(
 		printf("here1\n");
 		if(_actuator_failure_id >= 5 && _actuator_failure_id <= 8) {
 			printf("here2\n");
-			_actuator_trim(_actuator_failure_id) = 0;
+			_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
 		}
 		else {
 			printf("here3: %d\n", _actuator_failure_id);
 			known_ind.push_back(_actuator_failure_id-1);
 			std::sort(known_ind.begin(), known_ind.end());
-			_actuator_trim(_actuator_failure_id-1) = 0;
+			_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
 		}
 		failed = false;
 	}
-	// printf("known_id = [");
-	// for(int i = 0; i < int(known_ind.size()); ++i) {
-	// 	printf("%d, ", known_ind[i]);
-	// }
-	// printf("]\n");
+	printf("known_id = [");
+	for(int i = 0; i < int(known_ind.size()); ++i) {
+		printf("%d, ", known_ind[i]);
+	}
+	printf("]\n");
 	_effectiveness = effectiveness;
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);

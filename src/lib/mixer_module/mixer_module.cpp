@@ -112,6 +112,7 @@ void MixingOutput::updateParams()
 			_mixers->set_max_delta_out_once(0.f);
 		}
 		param_vtol_failure = _param_vtol_failure.get();
+		param_vtol_failure_val = _param_vtol_failure_val.get();
 		_mixers->set_thrust_factor(_param_thr_mdl_fac.get());
 		_mixers->set_airmode((Mixer::Airmode)_param_mc_airmode.get());
 	}
@@ -451,14 +452,28 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 		// Nuetral points:
 		// Ailerons (8 & 9): 1500
 		// Elevator ( 10 ):  1650
+
 		if(int(i) == (param_vtol_failure-1))
 		{
-			if(i < 13 && i > 4) actuator_outputs.output[i] = 1500;
-			else if (i > 0 && i <= 4) actuator_outputs.output[i] = 900;
-			if(i == 9) actuator_outputs.output[i] = 1550;
-			if (i > 4 && i <= 8) actuator_outputs.output[i] = 1600;
+			actuator_outputs.output[i] = _current_output_value[i];
+			if(i < 4) actuator_outputs.output[i] = int(1100 * param_vtol_failure_val + 900);
+			else if (i >= 4 && i < 8) actuator_outputs.output[i] = int(1000 * param_vtol_failure_val + 1000);
+			else if (i >= 8) actuator_outputs.output[i] = int(500 * param_vtol_failure_val + 1500);
+
+			// if(i < 13 && i > 4) actuator_outputs.output[i] = 1500;
+			// else if (i < 4) actuator_outputs.output[i] = 1600;
+			// if(i == 10) actuator_outputs.output[i] = 1600;
+			// if (i > 4 && i <= 8) actuator_outputs.output[i] = 1600;
 		}
+		// else
+		// {
+		// 	if (i < 4) actuator_outputs.output[i] = 1200;
+		// }
+
 	}
+	// printf("motor value = %d\n", int(actuator_outputs.output[0]));
+	// printf("tilt value = %d\n", int(actuator_outputs.output[5]));
+	// printf("aileron value = %d\n", int(actuator_outputs.output[9]));
 	// printf("elevator value = %d\n", int(actuator_outputs.output[10]));
 	actuator_outputs.timestamp = hrt_absolute_time();
 	_outputs_pub.publish(actuator_outputs);

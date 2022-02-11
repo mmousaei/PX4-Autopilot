@@ -136,7 +136,8 @@ ControlAllocator::parameters_updated()
 	actuator_max(15) = _param_ca_act15_max.get();
 	_control_allocation->setActuatorMax(actuator_max);
 	param_vtol_failure = _param_vtol_failure.get();
-	_control_allocation->getActuatorFailure(param_vtol_failure);
+	param_vtol_failure_val = _param_vtol_failure_val.get();
+	_control_allocation->getActuatorFailure(param_vtol_failure, param_vtol_failure_val);
 
 }
 
@@ -564,12 +565,12 @@ int ControlAllocator::print_status()
 	}
 
 	// Print current effectiveness matrix
-	if (_control_allocation != nullptr) {
-		const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &effectiveness = _control_allocation->getEffectivenessMatrix();
-		PX4_INFO("Effectiveness.T =");
-		effectiveness.T().print();
-		PX4_INFO("Configured actuators: %i", _control_allocation->numConfiguredActuators());
-	}
+	// if (_control_allocation != nullptr) {
+	// 	const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &effectiveness = _control_allocation->getEffectivenessMatrix();
+	// 	// PX4_INFO("Effectiveness.T =");
+	// 	// effectiveness.T().print();
+	// 	// PX4_INFO("Configured actuators: %i", _control_allocation->numConfiguredActuators());
+	// }
 
 	// Print perf
 	perf_print_counter(_loop_perf);

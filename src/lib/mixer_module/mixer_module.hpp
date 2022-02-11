@@ -277,11 +277,13 @@ private:
 	perf_counter_t _control_latency_perf;
 
 	int param_vtol_failure;
+	float param_vtol_failure_val;
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::MC_AIRMODE>) _param_mc_airmode,   ///< multicopter air-mode
 		(ParamFloat<px4::params::MOT_SLEW_MAX>) _param_mot_slew_max,
-		(ParamInt<px4::params::CMU_VTOL_FAILURE>) _param_vtol_failure,   ///< failure to an actuator
+		(ParamInt<px4::params::VTOL_FAILURE>) _param_vtol_failure,   ///< failure to an actuator
+		(ParamFloat<px4::params::VTOL_FAILURE_VAL>) _param_vtol_failure_val,   ///< failure value to an actuator
 		(ParamFloat<px4::params::THR_MDL_FAC>) _param_thr_mdl_fac, ///< thrust to motor control signal modelling factor
 		(ParamInt<px4::params::MOT_ORDERING>) _param_mot_ordering
 

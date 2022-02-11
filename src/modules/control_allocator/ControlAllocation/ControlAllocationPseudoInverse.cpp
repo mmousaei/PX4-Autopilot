@@ -108,19 +108,49 @@ ControlAllocationPseudoInverse::allocate()
 	_control_allocated = _effectiveness * _actuator_sp;
 	matrix::Vector<float, NUM_AXES> _control_unallocated;
 	_control_unallocated = (_control_sp - _control_allocated);
-	if (failed) {
-		if (_control_unallocated.norm() > 1) {
-			_actuator_unallocated_sp = _actuator_trim + _mix * _control_unallocated;
-			_actuator_sp += _actuator_unallocated_sp;
-			clipActuatorSetpoint(_actuator_sp);
+
+	if (_actuator_failure_id) {
+		printf("failure: %d, value = %f\n", _actuator_failure_id, double(_actuator_failure_val));
+		int cnter = 0;
+		int cnt_thresh = 100;
+		double Mnorm, Fnorm;
+		Mnorm = _control_unallocated(0)*_control_unallocated(0) + _control_unallocated(1)*_control_unallocated(1) + _control_unallocated(2)*_control_unallocated(2);
+		Fnorm = _control_unallocated(3)*_control_unallocated(3) + _control_unallocated(4)*_control_unallocated(4) + _control_unallocated(5)*_control_unallocated(5);
+		printf("Mnorm = %f, Fnorm = %f\n", Mnorm, Fnorm);
+		if (_actuator_failure_id > 8)
+		{
+			while ((_control_unallocated.norm() > float(0.1)) && cnter < cnt_thresh) {
+				_actuator_unallocated_sp =  _mix_unknown * (_control_unallocated - _control_known_sp);
+				_actuator_sp += _actuator_unallocated_sp;
+				clipActuatorSetpoint(_actuator_sp);
+				_control_allocated = _effectiveness * _actuator_sp;
+				_control_unallocated = (_control_sp - _control_allocated);
+				// printf("here re-allocate!: %f\n", double(_control_unallocated.norm()));
+				cnter++;
+			}
+			// printf("\n\n");
 		}
+		// printf("norm = %f\n", double(_control_unallocated.norm()));
+		else {
+			while (((Mnorm > 0.2) || (Fnorm > 2)) && cnter < cnt_thresh) {
+				_actuator_unallocated_sp =  _mix * _control_unallocated;
+				_actuator_sp += _actuator_unallocated_sp;
+				clipActuatorSetpoint(_actuator_sp); // TODO: make sure this is scale and clip
+				_control_allocated = _effectiveness * _actuator_sp;
+				_control_unallocated = (_control_sp - _control_allocated);
+				// printf("here re-allocate!: %f\n", double(_control_unallocated.norm()));
+				cnter++;
+			}
+			// printf("\n\n");
+		}
+
 	}
 	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
 	_airspeed_validated_sub.update(&_airspeed_validated);
-
-
+	// printf("airspeed = %f, Roll = %f, Pitch = %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.roll), double(_vtol_vehicle_status.pitch));
+	printf("c(3) =\t%.2f, c(4) =\t%.2f, c(5) =\t%.2f\n", double(_control_sp(3)), double(_control_sp(4)), double(_control_sp(5)) );
 	cFile.open("myFile.csv", std::ios_base::app);
-	cFile << std::endl << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " << double(_airspeed_validated.calibrated_airspeed_m_s)<< ", " << double(_vtol_vehicle_status.tiltrotor_tilt) << std::endl;
+	cFile << std::endl << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<< std::endl;
 	cFile.close();
 	// printf("un allocated = %f\n", double(_control_unallocated.norm()));
 

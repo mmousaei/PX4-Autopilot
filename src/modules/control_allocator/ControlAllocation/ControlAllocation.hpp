@@ -219,8 +219,9 @@ public:
 	virtual void updateParameters() {}
 
 	int numConfiguredActuators() const { return _num_actuators; }
-	void getActuatorFailure(int failure_id) {
+	void getActuatorFailure(int failure_id, float failure_val) {
 		_actuator_failure_id = failure_id;
+		_actuator_failure_val = failure_val;
 		if(_actuator_failure_id != 0) failed = true;
 	}
 
@@ -256,6 +257,7 @@ protected:
 	std::vector<int> known_ind{4, 5, 6, 7};
 
 	int _actuator_failure_id;	//failed actuator id given from QGC
+	float _actuator_failure_val;	//failed actuator value given from QGC
 
 	// float known_val[NUM_KNOWN];
 

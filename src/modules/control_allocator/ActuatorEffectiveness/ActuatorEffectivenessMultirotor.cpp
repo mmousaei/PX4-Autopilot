@@ -195,7 +195,7 @@ ActuatorEffectivenessMultirotor::computeEffectivenessMatrix(const MultirotorGeom
 
 		num_actuators = i + 1;
 	}
-	PX4_INFO("Effectiveness.T =");
-	effectiveness.T().print();
+	// PX4_INFO("Effectiveness.T =");
+	// effectiveness.T().print();
 	return num_actuators;
 }

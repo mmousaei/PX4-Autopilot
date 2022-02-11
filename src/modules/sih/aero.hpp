@@ -243,6 +243,7 @@ public:
 		}
 
 		_alpha = atan2f(vel(2), vel(0)) - _alpha_0;
+		printf("alpha = %f\n", double(_alpha));
 		aoa_coeff(_alpha, sqrtf(vxz2), def);
 		_Fa = _C_BS * (0.5f * _rho * vxz2 * _span * _mac) * matrix::Vector3f(_CL * sinf(_alpha) - _CD * cosf(_alpha),
 				0.0f,
