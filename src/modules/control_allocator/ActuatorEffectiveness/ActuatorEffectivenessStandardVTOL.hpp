@@ -45,6 +45,10 @@
 
 class ActuatorEffectivenessStandardVTOL: public ActuatorEffectiveness
 {
+
+
+
+
 public:
 	ActuatorEffectivenessStandardVTOL();
 	virtual ~ActuatorEffectivenessStandardVTOL() = default;
@@ -59,6 +63,10 @@ public:
 	void setFlightPhase(const FlightPhase &flight_phase) override;
 
 	int numActuators() const override { return 7; }
+
+
+
 protected:
 	bool _updated{true};
+
 };

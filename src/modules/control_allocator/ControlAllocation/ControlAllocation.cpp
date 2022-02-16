@@ -49,38 +49,48 @@ ControlAllocation::setEffectivenessMatrix(
 
 	if (failed) {
 		printf("here1\n");
-		if(_actuator_failure_id >= 5 && _actuator_failure_id <= 8) {
-			printf("here2\n");
-			_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
-		}
-		else {
+		// if(_actuator_failure_id >= 5 && _actuator_failure_id <= 8) {
+		// 	printf("here2\n");
+		// 	_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
+		// }
+		// else {
 			printf("here3: %d\n", _actuator_failure_id);
 			known_ind.push_back(_actuator_failure_id-1);
 			std::sort(known_ind.begin(), known_ind.end());
 			_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
-		}
+		// }
 		failed = false;
+		printf("known_id = [");
+		for(int i = 0; i < int(known_ind.size()); ++i) {
+			printf("%d, ", known_ind[i]);
+		}
+		printf("]\n");
 	}
-	printf("known_id = [");
-	for(int i = 0; i < int(known_ind.size()); ++i) {
-		printf("%d, ", known_ind[i]);
-	}
-	printf("]\n");
+
 	_effectiveness = effectiveness;
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
 	_control_trim = _effectiveness * _actuator_trim;
+
+
 	// ADDED
 	float act_trim_k [NUM_ACTUATORS];
 	int ind = 0;
 	for(int i = 0; i < NUM_ACTUATORS; ++i) {
-		if (i == known_ind[ind]) {
-			act_trim_k[i] = _actuator_trim(i);
-			ind++;
+		if(_actuator_failure_id) {
+			if (i == known_ind[ind]) {
+				act_trim_k[i] = _actuator_trim(i);
+				ind++;
+			}
+			else {
+				act_trim_k[i] = 0.0f;
+			}
 		}
-		else {
+		else
+		{
 			act_trim_k[i] = 0.0f;
 		}
+
 	}
 	_actuator_trim_known = matrix::Vector<float, NUM_ACTUATORS>(act_trim_k);
 	_actuator_trim_unknown = _actuator_trim - _actuator_trim_known;
@@ -88,13 +98,22 @@ ControlAllocation::setEffectivenessMatrix(
 	for (int j = 0; j < NUM_AXES; ++j) {
 		ind = 0;
 		for(int i = 0; i < NUM_ACTUATORS; ++i) {
-			if(i == known_ind[ind]) {
-				eff_known[j][i] = _effectiveness(j, i);
-				ind++;
+			if (_actuator_failure_id)
+			{
+				if(i == known_ind[ind]) {
+					eff_known[j][i] = _effectiveness(j, i);
+					ind++;
+				}
+				else {
+					eff_known[j][i] = 0.0f;
+				}
 			}
-			else {
+			else
+			{
 				eff_known[j][i] = 0.0f;
 			}
+
+
 		}
 	}
 	_effectiveness_known = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> (eff_known);
@@ -160,17 +179,48 @@ ControlAllocation::setActuatorSetpoint(
 void
 ControlAllocation::clipActuatorSetpoint(matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator) const
 {
+	float mx = -100000.f;
+	float mn = 100000.f;
+	float eps = 0.01;
 	for (int i = 0; i < _num_actuators; i++) {
-		if (_actuator_max(i) < _actuator_min(i)) {
+		if(i < 4)
+		{
+			if (actuator(i) < _actuator_min(i) && actuator(i) < mn) {
+				mn = actuator(i);
+
+			} else if (actuator(i) > _actuator_max(i) && actuator(i) > mx) {
+				mx = actuator(i);
+			}
+		}
+		else
+		{
+			if (_actuator_max(i) < _actuator_min(i)) {
 			actuator(i) = _actuator_trim(i);
 
-		} else if (actuator(i) < _actuator_min(i)) {
-			actuator(i) = _actuator_min(i);
+			} else if (actuator(i) < _actuator_min(i)) {
+				actuator(i) = _actuator_min(i);
 
-		} else if (actuator(i) > _actuator_max(i)) {
-			actuator(i) = _actuator_max(i);
+			} else if (actuator(i) > _actuator_max(i)) {
+				actuator(i) = _actuator_max(i);
+			}
 		}
 	}
+	if (fabs(mx + 100000.f) > eps)
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			actuator(i) = actuator(i)*_actuator_max(i)/mx;
+		}
+
+	}
+	else if (fabs(mn - 100000) > eps)
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			actuator(i) = actuator(i)*_actuator_min(i)/mn;
+		}
+	}
+
 }
 
 matrix::Vector<float, ControlAllocation::NUM_ACTUATORS>

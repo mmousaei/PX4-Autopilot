@@ -254,7 +254,7 @@ protected:
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_unknown_sp;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_known_sp;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_unallocated_sp;  	//< Actuator setpoint
-	std::vector<int> known_ind{4, 5, 6, 7};
+	std::vector<int> known_ind{};
 
 	int _actuator_failure_id;	//failed actuator id given from QGC
 	float _actuator_failure_val;	//failed actuator value given from QGC

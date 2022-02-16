@@ -65,6 +65,7 @@ public:
 private:
 	vtol_vehicle_status_s _vtol_vehicle_status {};
 	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
+	int print_cnt = 0;
 protected:
 	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix;
 	// ADDED

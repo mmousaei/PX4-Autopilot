@@ -104,6 +104,10 @@ public:
 	 */
 	virtual int numActuators() const = 0;
 
+	void setFailure(int id, float val) {_failure_id = id; _failure_val = val;}
+
+	int _failure_id{0};
+	float _failure_val{0.f};
 protected:
 	matrix::Vector<float, NUM_ACTUATORS> _trim;			///< Actuator trim
 	FlightPhase _flight_phase{FlightPhase::HOVER_FLIGHT};		///< Current flight phase

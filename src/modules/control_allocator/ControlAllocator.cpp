@@ -380,7 +380,7 @@ ControlAllocator::update_effectiveness_matrix_if_needed()
 {
 	//PX4_ERR("up eff mat if needed");
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> effectiveness;
-
+	_actuator_effectiveness->setFailure(param_vtol_failure, param_vtol_failure_val);
 	if (_actuator_effectiveness->getEffectivenessMatrix(effectiveness)) {
 		const matrix::Vector<float, NUM_ACTUATORS> &trim = _actuator_effectiveness->getActuatorTrim();
 

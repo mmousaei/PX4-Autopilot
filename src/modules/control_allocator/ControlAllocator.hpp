@@ -162,6 +162,7 @@ private:
 
 	int param_vtol_failure;
 	float param_vtol_failure_val;
+
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::CA_AIRFRAME>) _param_ca_airframe,
 		(ParamInt<px4::params::CA_METHOD>) _param_ca_method,

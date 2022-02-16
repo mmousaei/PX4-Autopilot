@@ -77,6 +77,9 @@ public:
 	 */
 	void setFlightPhase(const FlightPhase &flight_phase) override;
 
+
+
+
 	int numActuators() const override { return 11; }
 	struct airspeed_validated_s 			*get_airspeed() {return &_airspeed_validated;}
 private:
@@ -84,6 +87,7 @@ private:
 	vtol_vehicle_status_s _vtol_vehicle_status {};
 	uORB::Subscription _airspeed_validated_sub{ORB_ID(airspeed_validated)};
 	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
+
 protected:
 	bool _updated{true};
 };

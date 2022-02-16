@@ -84,20 +84,56 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 
 	airspeed = float(_airspeed_validated.calibrated_airspeed_m_s);
 	tilt = float(_vtol_vehicle_status.tiltrotor_tilt);
-	_trim(0) = 0.5f;
-	_trim(1) = 0.5f;
-	_trim(2) = 0.5f;
-	_trim(3) = 0.5f;
-	_trim(4) = tilt;
-	_trim(5) = tilt;
-	_trim(6) = tilt;
-	_trim(7) = tilt;
+	// _trim(0) = 0.5f;
+	// _trim(1) = 0.5f;
+	// _trim(2) = 0.5f;
+	// _trim(3) = 0.5f;
+	if(!_vtol_vehicle_status.vtol_in_rw_mode)
+	{
+		// printf("not rw mode!\n");
+		_trim(0) = 0.f;
+		_trim(1) = 0.f;
+		_trim(2) = 0.f;
+		_trim(3) = 0.f;
+	}
+	else
+	{
+		// printf("rw mode!\n");
+		_trim(0) = 1.0f;
+		_trim(1) = 1.0f;
+		_trim(2) = 1.0f;
+		_trim(3) = 1.0f;
+	}
+
+	// _trim(4) = tilt*1.570796f;
+	// _trim(5) = tilt*1.570796f;
+	// _trim(6) = tilt*1.570796f;
+	// _trim(7) = tilt*1.570796f;
+	// printf("id = %d, val = %f", _failure_id, double(_failure_val));
+
+	for (int i = 4; i < 8; i++)
+	{
+		if(i - 4 == _failure_id - 1) {
+			_trim(i - 4) = _failure_val;
+		}
+		if(i + 4 == _failure_id - 1) {
+			_trim(i + 4) = _failure_val;
+		}
+		if(i == _failure_id - 1) {
+			_trim(i) = _failure_val;
+		}
+		else
+		{
+			_trim(i) = tilt*1.570796f;
+		}
+	}
+
 	// printf("alan injaaaaaaaaaaaaaaam  =  %f,  %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.tiltrotor_tilt));
 
-	float trim4_m = _trim(4)*1.570796f;
-	float trim5_m = _trim(5)*1.570796f;
-	float trim6_m = _trim(6)*1.570796f;
-	float trim7_m = _trim(7)*1.570796f;
+	float trim4_m = tilt*1.570796f;
+	float trim5_m = tilt*1.570796f;
+	float trim6_m = tilt*1.570796f;
+	float trim7_m = tilt*1.570796f;
 
 	// // Effectiveness
 	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
@@ -131,7 +167,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float Px_3 = -0.1515f;
 	float Py_3 = 0.245f;
 	float Pz_3 = 0.0f;
-	float Ct = 6.5f;
+	float Ct = 5.0f;
 	float Km = 0.05f;
 	float ro = 1.225f;
 	float q_bar = ro * airspeed * airspeed / 2;
@@ -146,11 +182,19 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
 		{-Py_0 * Ct*cosf(trim4_m) - Ct * Km * sinf(trim4_m),	-Py_1 * Ct*cosf(trim5_m) - Ct * Km * sinf(trim5_m),	 -Py_2 * Ct*cosf(trim6_m) + Ct * Km * sinf(trim6_m),	-Py_3 * Ct*cosf(trim7_m) + Ct * Km * sinf(trim7_m),	 Py_0 * Ct*_trim(0) *sinf(trim4_m) - Ct * Km * _trim(0) *cosf(trim4_m),    	     Py_1 * Ct*_trim(1) *sinf(trim5_m) - Ct * Km * _trim(1) *cosf(trim5_m),		 		Py_2 * Ct*_trim(2) *sinf(trim6_m) + Ct * Km * _trim(2) *cosf(trim6_m),		         	Py_3 * Ct*_trim(3) *sinf(trim7_m) + Ct * Km * _trim(3) *cosf(trim7_m),  			-q_bar*S*b*Cla,		 q_bar*S*b*Cla,		 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
 		{ Ct*(Px_0 * cosf(trim4_m) + Pz_0 * sinf(trim4_m)),    Ct*(Px_1 * cosf(trim5_m) + Pz_1 * sinf(trim5_m)),	  Ct*(Px_2 * cosf(trim6_m) + Pz_2 * sinf(trim6_m)),	 Ct*(Px_3 * cosf(trim7_m) + Pz_3 * sinf(trim7_m)),	 Ct*_trim(0) *(-Px_0 * sinf(trim4_m) + Pz_0 * cosf(trim4_m)), 	     		     Ct*_trim(1) *(-Px_1 *sinf(trim5_m) + Pz_1 * cosf(trim5_m)),					Ct*_trim(2) *(-Px_2 *sinf(trim6_m) + Pz_2 * cosf(trim6_m)),					Ct*_trim(3) *(-Px_3 *sinf(trim7_m) + Pz_3 *cosf(trim7_m)),  					 0.f, 		 	 0.f, 		 	 q_bar*S*c_bar*Cme,		 0.f, 			0.f, 0.f, 0.f, 0.f},
-		{-Py_0 * Ct*sinf(trim4_m) + Ct * Km * cosf(trim4_m),	-Py_1 * Ct*sinf(trim5_m) + Ct * Km * cosf(trim5_m),	 -Py_2 * Ct*sinf(trim6_m) - Ct * Km * cosf(trim6_m),	-Py_3 * Ct*sinf(trim7_m) - Ct * Km * cosf(trim7_m),	-Py_0 * Ct*_trim(0) *cosf(trim4_m) - Ct * Km * _trim(0) *sinf(trim4_m),   	     -Py_1 * Ct*_trim(1) *cosf(trim5_m) - Ct * Km * _trim(1) *sinf(trim5_m),			-Py_2 * Ct*_trim(2) *cosf(trim6_m) + Ct * Km * _trim(2) *sinf(trim6_m), 		-Py_3 * Ct*_trim(3) *cosf(trim7_m) + Ct * Km * _trim(3) *sinf(trim7_m),  			 0.f, 		 	 0.f, 		 	 0.f, 		 		 q_bar*S*b*Cnr, 	0.f, 0.f, 0.f, 0.f},
+		{-Py_0 * Ct*sinf(trim4_m) + Ct * Km * cosf(trim4_m),	-Py_1 * Ct*sinf(trim5_m) + Ct * Km * cosf(trim5_m),	 -Py_2 * Ct*sinf(trim6_m) - Ct * Km * cosf(trim6_m),	-Py_3 * Ct*sinf(trim7_m) - Ct * Km * cosf(trim7_m),	-Py_0 * Ct*_trim(0) *cosf(trim4_m) - Ct * Km * _trim(0) *sinf(trim4_m),   	     -Py_1 * Ct*_trim(1) *cosf(trim5_m) - Ct * Km * _trim(1) *sinf(trim5_m),				-Py_2 * Ct*_trim(2) *cosf(trim6_m) + Ct * Km * _trim(2) *sinf(trim6_m), 			-Py_3 * Ct*_trim(3) *cosf(trim7_m) + Ct * Km * _trim(3) *sinf(trim7_m),  			 0.f, 		 	 0.f, 		 	 0.f, 		 		 q_bar*S*b*Cnr, 	0.f, 0.f, 0.f, 0.f},
 		{ Ct * sinf(trim4_m),	 				 Ct * sinf(trim5_m),					 Ct * sinf(trim6_m),					 Ct * sinf(trim7_m),					 Ct * _trim(0) *cosf(trim4_m), 					     		     Ct * _trim(1) *cosf(trim5_m),							 		Ct * _trim(2) *cosf(trim6_m), 								 	Ct * _trim(3) *cosf(trim7_m),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
-		{ 0.f,  			 			 0.f,  							 0.f,  							 0.f,	 						 0.f,		 		  					     		     0.f, 			      							 		0.f, 			    	  								 0.f, 			           								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+		{ 0.f,  			 			 0.f,  							 0.f,  							 0.f,	 						 0.f,		 		  					     	     0.f, 			      							 		0.f, 			    	  								 0.f, 			           								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
 		{-Ct * cosf(trim4_m),	 			        -Ct * cosf(trim5_m),					-Ct * cosf(trim6_m),					-Ct * cosf(trim7_m),					 Ct * _trim(0) *sinf(trim4_m), 					     		     Ct * _trim(1) *sinf(trim5_m),							 		Ct * _trim(2) *sinf(trim6_m), 								 	Ct * _trim(3) *sinf(trim7_m),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f}
 	};
+	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
+	// 	{-Py_0 * Ct*cosf(trim4_m) - Ct * Km * sinf(trim4_m),	-Py_1 * Ct*cosf(trim5_m) - Ct * Km * sinf(trim5_m),	 -Py_2 * Ct*cosf(trim6_m) + Ct * Km * sinf(trim6_m),	-Py_3 * Ct*cosf(trim7_m) + Ct * Km * sinf(trim7_m),	 Py_0 * Ct*_trim(0) *sinf(trim4_m) - Ct * Km * _trim(0) *cosf(trim4_m),    	     Py_1 * Ct*_trim(1) *sinf(trim5_m) - Ct * Km * _trim(1) *cosf(trim5_m),		 		Py_2 * Ct*_trim(2) *sinf(trim6_m) + Ct * Km * _trim(2) *cosf(trim6_m),		         	Py_3 * Ct*_trim(3) *sinf(trim7_m) + Ct * Km * _trim(3) *cosf(trim7_m),  			-q_bar*S*b*Cla,		 q_bar*S*b*Cla,		 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+	// 	{ Ct*(Px_0 * cosf(trim4_m) + Pz_0 * sinf(trim4_m)),    Ct*(Px_1 * cosf(trim5_m) + Pz_1 * sinf(trim5_m)),	  Ct*(Px_2 * cosf(trim6_m) + Pz_2 * sinf(trim6_m)),	 Ct*(Px_3 * cosf(trim7_m) + Pz_3 * sinf(trim7_m)),	 Ct*_trim(0) *(-Px_0 * sinf(trim4_m) + Pz_0 * cosf(trim4_m)), 	     		     Ct*_trim(1) *(-Px_1 *sinf(trim5_m) + Pz_1 * cosf(trim5_m)),					Ct*_trim(2) *(-Px_2 *sinf(trim6_m) + Pz_2 * cosf(trim6_m)),					Ct*_trim(3) *(-Px_3 *sinf(trim7_m) + Pz_3 *cosf(trim7_m)),  					 0.f, 		 	 0.f, 		 	 q_bar*S*c_bar*Cme,		 0.f, 			0.f, 0.f, 0.f, 0.f},
+	// 	{-Py_0 * Ct*sinf(trim4_m) + Ct * Km * cosf(trim4_m),	-Py_1 * Ct*sinf(trim5_m) + Ct * Km * cosf(trim5_m),	 -Py_2 * Ct*sinf(trim6_m) - Ct * Km * cosf(trim6_m),	-Py_3 * Ct*sinf(trim7_m) - Ct * Km * cosf(trim7_m),	-Py_0 * Ct*_trim(0) *cosf(trim4_m) - Ct * Km * _trim(0) *sinf(trim4_m),   	     -Py_1 * Ct*_trim(1) *cosf(trim5_m) - Ct * Km * _trim(1) *sinf(trim5_m),				-Py_2 * Ct*_trim(2) *cosf(trim6_m) + Ct * Km * _trim(2) *sinf(trim6_m), 			-Py_3 * Ct*_trim(3) *cosf(trim7_m) + Ct * Km * _trim(3) *sinf(trim7_m),  			 0.f, 		 	 0.f, 		 	 0.f, 		 		 q_bar*S*b*Cnr, 	0.f, 0.f, 0.f, 0.f},
+	// 	{ Ct * sinf(trim4_m),	 				 Ct * sinf(trim5_m),					 Ct * sinf(trim6_m),					 Ct * sinf(trim7_m),					 Ct * _trim(0) *cosf(trim4_m), 					     		     Ct * _trim(1) *cosf(trim5_m),							 		Ct * _trim(2) *cosf(trim6_m), 								 	Ct * _trim(3) *cosf(trim7_m),   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+	// 	{ 0.f,  			 			 0.f,  							 0.f,  							 0.f,	 						 0.f,		 		  					     	     0.f, 			      							 		0.f, 			    	  								 0.f, 			           								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f},
+	// 	{-Ct * cosf(trim4_m),	 			        -Ct * cosf(trim5_m),					-Ct * cosf(trim6_m),					-Ct * cosf(trim7_m),					 0.f, 					     		     				0.f,							 					0.f, 								 				0.f,   								 0.f, 		 	 0.f, 		 	 0.f, 		 		 0.f, 			0.f, 0.f, 0.f, 0.f}
+	// };
 	matrix = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS>(tiltrotor_vtol);
 
 	_updated = false;
