@@ -131,6 +131,9 @@ ControlAllocationPseudoInverse::allocate()
 	// _effectiveness.T().print();
 	// printf("_effectiveness_unknown:\n");
 	// _effectiveness_unknown.T().print();
+	printf("nullspace = \n");
+	_nullspace.print();
+
 	if (_actuator_failure_id) {
 		float act_known[NUM_ACTUATORS];
 		int cnt = 0;
@@ -204,8 +207,8 @@ ControlAllocationPseudoInverse::allocate()
 		// _actuator_sp.T().print();
 		// printf("\n\n\n");
 	}
-	printf("\nreallocated_actuator_sp:\n");
-		_actuator_sp.T().print();
+	// printf("\nreallocated_actuator_sp:\n");
+	// 	_actuator_sp.T().print();
 	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
 	_airspeed_validated_sub.update(&_airspeed_validated);
 	// printf("airspeed = %f, Roll = %f, Pitch = %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.roll), double(_vtol_vehicle_status.pitch));

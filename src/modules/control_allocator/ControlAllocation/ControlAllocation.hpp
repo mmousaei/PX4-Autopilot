@@ -80,6 +80,9 @@
 #include <uORB/SubscriptionCallback.hpp>
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/airspeed_validated.h>
+#include "alglib-cpp/src/ap.h"
+#include "alglib-cpp/src/linalg.h"
+#include "alglib-cpp/src/stdafx.h"
 
 class ControlAllocation
 {
@@ -215,6 +218,40 @@ public:
 	 */
 	matrix::Vector<float, NUM_ACTUATORS> normalizeActuatorSetpoint(const matrix::Vector<float, NUM_ACTUATORS> &actuator)
 	const;
+
+		/**
+	 * Author: Mohammad
+	 * Find the nullspace of the matrix
+	 *
+	 * @param m Input matrix
+	 *
+	 * @param nullspace Output nullspace of input m
+	 * @param nullsize Output nullspace sice of input m
+	 */
+	void getNullSpace(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m, matrix::Matrix<float, NUM_ACTUATORS - 4, NUM_ACTUATORS - 4> &nullspace, int &nullsize);
+
+	/**
+	 * Author: Mohammad
+	 * Convert from px4 matrix to alglib matrix
+	 *
+	 * @param m Input matrix
+	 *
+	 * @return Converted matrix
+	 */
+	alglib::real_2d_array matrixToAlglib(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m);
+
+	/**
+	 * Author: Mohammad
+	 * Convert from alglib matrix to px4 matrix
+	 *
+	 * @param m Input matrix
+	 *
+	 * @return Converted matrix
+	 */
+	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> alglibToMatrix(const alglib::real_2d_array &m);
+
+	void printAlglib(const alglib::real_2d_array &a);
+
 	bool failed = false;
 	virtual void updateParameters() {}
 
@@ -232,6 +269,7 @@ public:
 
 protected:
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> _effectiveness;  //< Effectiveness matrix
+	matrix::Matrix<float, NUM_ACTUATORS - 4, NUM_ACTUATORS - 4> _nullspace;  //< Effectiveness matrix
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_trim; 	//< Neutral actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_min; 	//< Minimum actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_max; 	//< Maximum actuator values
