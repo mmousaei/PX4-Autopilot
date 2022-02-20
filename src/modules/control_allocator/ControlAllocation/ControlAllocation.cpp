@@ -48,17 +48,11 @@ ControlAllocation::setEffectivenessMatrix(
 {
 
 	if (failed) {
-		printf("here1\n");
-		// if(_actuator_failure_id >= 5 && _actuator_failure_id <= 8) {
-		// 	printf("here2\n");
-		// 	_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
-		// }
-		// else {
-			printf("here3: %d\n", _actuator_failure_id);
-			known_ind.push_back(_actuator_failure_id-1);
-			std::sort(known_ind.begin(), known_ind.end());
-			_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
-		// }
+
+		printf("failed actuator: %d\n", _actuator_failure_id);
+		known_ind.push_back(_actuator_failure_id-1);
+		std::sort(known_ind.begin(), known_ind.end());
+		_actuator_trim(_actuator_failure_id-1) = _actuator_failure_val;
 		failed = false;
 		printf("known_id = [");
 		for(int i = 0; i < int(known_ind.size()); ++i) {
@@ -69,14 +63,13 @@ ControlAllocation::setEffectivenessMatrix(
 
 	_effectiveness = effectiveness;
 	int sz;
-	// matrix::Matrix<float,ControlAllocation::NUM_ACTUATORS - 4, ControlAllocation::NUM_ACTUATORS - 4> null_space;
 	getNullSpace(_effectiveness, _nullspace, sz);
+
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
 	_control_trim = _effectiveness * _actuator_trim;
 
 
-	// ADDED
 	float act_trim_k [NUM_ACTUATORS];
 	int ind = 0;
 	for(int i = 0; i < NUM_ACTUATORS; ++i) {
@@ -125,41 +118,12 @@ ControlAllocation::setEffectivenessMatrix(
 	_control_trim_known = _effectiveness_known * _actuator_trim_known;
 	_control_trim_unknown = _effectiveness_unknown * _actuator_trim_unknown;
 
-	// printf("_control_trim:\n");
-	// _control_trim.print();
-	// printf("_control_trim_known:\n");
-	// _control_trim_known.print();
-	// printf("_control_trim_unknown:\n");
-	// _control_trim_unknown.print();
-
-	// printf("_actuator_trim_known:\n");
-	// _actuator_trim_known.T().print();
-	// printf("_actuator_trim_unknown:\n");
-	// _actuator_trim_unknown.T().print();
-	// printf("_actuator_trim:\n");
-	// _actuator_trim.T().print();
-
-	// printf("_effectiveness_known:\n");
-	// _effectiveness_known.print();
-	// printf("_effectiveness_unknown:\n");
-	// _effectiveness_unknown.print();
-	// printf("_effectiveness:\n");
-	// _effectiveness.print();
-
-
-
-
-
-
-	// ADDED
 	_num_actuators = num_actuators;
 
 	// make sure unused actuators are initialized to trim
 	for (int i = num_actuators; i < NUM_ACTUATORS; ++i) {
 		_actuator_sp(i) = _actuator_trim(i);
 	}
-	// fprintf(cFile, "%f, %f, %f, %f, %f, %f\n", double(_control_sp(0)), double(_control_sp(1)), double(_control_sp(2)), double(_control_sp(3)), double(_control_sp(4)), double(_control_sp(5)));
-	// fclose(cFile);
 
 }
 
@@ -248,11 +212,6 @@ void
 ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &m, matrix::Matrix<float, ControlAllocation::NUM_ACTUATORS - 4, ControlAllocation::NUM_ACTUATORS - 4> &nullspace, int &nullsize)
 {
 	alglib::real_2d_array a = matrixToAlglib(m);
-	// printf("m = ");
-	// m.print();
-
-	// printf("\na = ");
-	// printAlglib(a);
 
 	alglib::ae_int_t vtneeded = 2; // Determines if vt matrix is needed
 	alglib::ae_int_t uneeded = 1; // Determines if u matrix is needed
@@ -274,7 +233,6 @@ ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::N
 	bool success = alglib::rmatrixsvd(a, a.rows(), a.cols(), uneeded, vtneeded, additionalmemory, w, u, vt);
 	int non_zero_eigens = 0;
 
-	// printf("W = [ %f  %f  %f  %f  %f  %f ]\n", w(0), w(1), w(2), w(3), w(4), w(5));
 	if(success) {
 		for(int i = 0; i < ControlAllocation::NUM_AXES; ++i) {
 			if(w(i) > 0.001)
@@ -284,21 +242,15 @@ ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::N
 		}
 	}
 	nullsize = ControlAllocation::NUM_ACTUATORS - 4 - non_zero_eigens;
-	// printf("\nnon_zero_eigens = %d\n\n", non_zero_eigens);
-	// printf("\n\nNullsize = %d\n\n", nullsize);
-	// printf("\n U size = [%d, %d]\n", u.cols(), u.rows());
-	// printf("\n vt size = [%d, %d]\n", vt.cols(), vt.rows());
-	// printAlglib(vt);
 
 	for(int i = 0; i < ControlAllocation::NUM_ACTUATORS - 4; ++i) {
 		for(int j = 0; j < nullsize; ++j) {
-			nullspace(i, j) = vt(i, j + non_zero_eigens);
+			nullspace(i, j) = vt(j + non_zero_eigens, i);
 		}
 	}
-	// printf("Nullspace_print = \n [");
-	// nullspace.print();
-
+	// printf("W = [ %f  %f  %f  %f  %f  %f ]\n", w(0), w(1), w(2), w(3), w(4), w(5));
 }
+
 
 alglib::real_2d_array
 ControlAllocation::matrixToAlglib(const matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS> &m)
@@ -335,7 +287,7 @@ void ControlAllocation::printAlglib(const alglib::real_2d_array &a)
 	{
 		for ( j = 0; j < a.cols(); j++)
 		{
-			printf("\t %f, ", double(a(i, j)));
+			printf("\t %.6f, ", double(a(i, j)));
 		}
 		printf("\n");
 	}

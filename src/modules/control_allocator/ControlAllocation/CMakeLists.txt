@@ -51,12 +51,15 @@ px4_add_library(ControlAllocation
 	alglib-cpp/src/kernels_fma.cpp
 	alglib-cpp/src/kernels_sse2.cpp
 	alglib-cpp/src/optimization.cpp
+	alglib-cpp/src/optimization.o
+	alglib-cpp/src/optimization.h
 	alglib-cpp/src/solvers.cpp
 	alglib-cpp/src/specialfunctions.cpp
 	alglib-cpp/src/statistics.cpp
+	alglib-cpp/src/stdafx.h
 )
 target_compile_options(ControlAllocation PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
-target_include_directories(ControlAllocation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(ControlAllocation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/alglib-cpp/src)
 target_link_libraries(ControlAllocation PRIVATE mathlib)
 
 px4_add_unit_gtest(SRC ControlAllocationPseudoInverseTest.cpp LINKLIBS ControlAllocation)

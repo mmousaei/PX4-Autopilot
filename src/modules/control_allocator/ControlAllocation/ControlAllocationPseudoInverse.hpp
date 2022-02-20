@@ -62,10 +62,13 @@ public:
 	virtual void setEffectivenessMatrix(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &effectiveness,
 					    const matrix::Vector<float, NUM_ACTUATORS> &actuator_trim, int num_actuators) override;
 
+
 private:
 	vtol_vehicle_status_s _vtol_vehicle_status {};
 	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
 	int print_cnt = 0;
+	void _optimize_allocation();
+
 protected:
 	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix;
 	// ADDED

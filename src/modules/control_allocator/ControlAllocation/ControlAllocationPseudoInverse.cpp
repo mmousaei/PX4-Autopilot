@@ -65,6 +65,7 @@ ControlAllocationPseudoInverse::allocate()
 {
 	//Compute new gains if needed
 	updatePseudoInverse();
+	_optimize_allocation();
 
 	// Allocate
 	// _actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
@@ -131,8 +132,8 @@ ControlAllocationPseudoInverse::allocate()
 	// _effectiveness.T().print();
 	// printf("_effectiveness_unknown:\n");
 	// _effectiveness_unknown.T().print();
-	printf("nullspace = \n");
-	_nullspace.print();
+	// printf("nullspace = \n");
+	// _nullspace.print();
 
 	if (_actuator_failure_id) {
 		float act_known[NUM_ACTUATORS];
@@ -177,6 +178,7 @@ ControlAllocationPseudoInverse::allocate()
 		// printf("Mnorm = %f, Fnorm = %f\n", Mnorm, Fnorm);
 		// if (_actuator_failure_id > 8)
 		// {
+
 			// while ((_control_unallocated.norm() > float(0.01)) && cnter < cnt_thresh) {
 			while (((Mnorm > 0.01) || (Fnorm > 1)) && cnter < cnt_thresh) {
 				_actuator_unallocated_sp =  _mix_unknown * (_control_unallocated - _control_known_sp);
@@ -218,4 +220,62 @@ ControlAllocationPseudoInverse::allocate()
 	cFile.close();
 	// printf("un allocated = %f\n", double(_control_unallocated.norm()));
 
+}
+
+void ControlAllocationPseudoInverse::_optimize_allocation()
+{
+// This example demonstrates minimization of nonconvex function
+//     F(x0,x1) = -(x0^2+x1^2)
+// subject to constraints x0,x1 in [1.0,2.0]
+// Exact solution is [x0,x1] = [2,2].
+//
+// Non-convex problems are harded to solve than convex ones, and they
+// may have more than one local minimum. However, ALGLIB solves may deal
+// with such problems (altough they do not guarantee convergence to
+// global minimum).
+//
+// IMPORTANT: this solver minimizes  following  function:
+//     f(x) = 0.5*x'*A*x + b'*x.
+// Note that quadratic term has 0.5 before it. So if you want to minimize
+// quadratic function, you should rewrite it in such way that quadratic term
+// is multiplied by 0.5 too.
+//
+// For example, our function is f(x)=-(x0^2+x1^2), but we rewrite it as
+//     f(x) = 0.5*(-2*x0^2-2*x1^2)
+// and pass diag(-2,-2) as quadratic term - NOT diag(-1,-1)!
+//
+	alglib::real_2d_array a;
+	double data_2_2[4] = {-2.0, 0.0, 0.0, -2.0};
+	a.setcontent(2, 2, data_2_2);
+	alglib::real_1d_array x0;
+	double data_2[2] = {1.0, 1.0};
+	x0.setcontent(2, data_2);
+	alglib::real_1d_array s;
+	s.setcontent(2, data_2);
+	alglib::real_1d_array bndl;
+	bndl.setcontent(2, data_2);
+	alglib::real_1d_array bndu;
+	data_2[0] = 2.0;
+	data_2[1] = 2.0;
+	bndu.setcontent(2, data_2);
+
+	alglib::real_1d_array x;
+	alglib::minqpstate state;
+	alglib_impl::ae_state _state;
+	alglib_impl::ae_state_init(&_state);
+	alglib::minqpreport rep;
+
+	// alglib_impl::minqpcreate(2, const_cast<alglib_impl::minqpstate*>(state.c_ptr()), &_state);
+	alglib::minqpcreate(2, state);
+	alglib_impl::minqpsetquadraticterm(const_cast<alglib_impl::minqpstate*>(state.c_ptr()), const_cast<alglib_impl::ae_matrix*>(a.c_ptr()), isupper, &_state);
+	alglib::minqpsetstartingpoint(state, x0);
+	alglib::minqpsetbc(state, bndl, bndu);
+
+	alglib::minqpsetscale(state, s);
+
+	// minqpsetalgobleic(state, 0.0, 0.0, 0.0, 0);
+	alglib::minqpsetalgoquickqp(state, 0.0, 0.0, 0.0, 0, true);
+	alglib::minqpoptimize(state);
+	alglib::minqpresults(state, x, rep);
+	printf("solution = [%f, %f]\n", x[0], x[1]); // EXPECTED: [2,2]
 }

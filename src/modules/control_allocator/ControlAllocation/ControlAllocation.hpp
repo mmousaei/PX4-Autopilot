@@ -69,6 +69,7 @@
 
 #pragma once
 
+#include "alglib-cpp/src/stdafx.h"
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/vehicle_actuator_setpoint.h>
 #include <vector>
@@ -80,8 +81,12 @@
 #include <uORB/SubscriptionCallback.hpp>
 #include <uORB/topics/vtol_vehicle_status.h>
 #include <uORB/topics/airspeed_validated.h>
+#include "alglib-cpp/src/optimization.h"
 #include "alglib-cpp/src/ap.h"
 #include "alglib-cpp/src/linalg.h"
+#include "alglib-cpp/src/alglibmisc.h"
+#include "alglib-cpp/src/alglibinternal.h"
+#include "alglib-cpp/src/solvers.h"
 #include "alglib-cpp/src/stdafx.h"
 
 class ControlAllocation
