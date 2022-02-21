@@ -67,7 +67,11 @@ private:
 	vtol_vehicle_status_s _vtol_vehicle_status {};
 	uORB::Subscription _vtol_vehicle_status_sub{ORB_ID(vtol_vehicle_status)};
 	int print_cnt = 0;
-	void _optimize_allocation();
+	alglib::real_1d_array _lambda_sol;
+	alglib::real_1d_array _last_lambda_sol;
+	bool _last_lambda_init = false;
+	void _optimize_sample();
+	void _optimize_allocation(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt);
 
 protected:
 	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix;

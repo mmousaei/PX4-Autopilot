@@ -244,6 +244,7 @@ public:
 	 * @return Converted matrix
 	 */
 	alglib::real_2d_array matrixToAlglib(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m);
+	alglib::real_1d_array matrixToAlglib(const matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> &m);
 
 	/**
 	 * Author: Mohammad
@@ -256,6 +257,7 @@ public:
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> alglibToMatrix(const alglib::real_2d_array &m);
 
 	void printAlglib(const alglib::real_2d_array &a);
+	void printAlglib(const alglib::real_1d_array &a);
 
 	bool failed = false;
 	virtual void updateParameters() {}
@@ -299,6 +301,7 @@ protected:
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_unallocated_sp;  	//< Actuator setpoint
 	std::vector<int> known_ind{};
 
+	int _null_size;
 	int _actuator_failure_id;	//failed actuator id given from QGC
 	float _actuator_failure_val;	//failed actuator value given from QGC
 

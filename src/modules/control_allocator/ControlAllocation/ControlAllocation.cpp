@@ -63,7 +63,7 @@ ControlAllocation::setEffectivenessMatrix(
 
 	_effectiveness = effectiveness;
 	int sz;
-	getNullSpace(_effectiveness, _nullspace, sz);
+	getNullSpace(_effectiveness, _nullspace, _null_size);
 
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
@@ -267,6 +267,18 @@ ControlAllocation::matrixToAlglib(const matrix::Matrix<float, ControlAllocation:
 	}
 	return c;
 }
+alglib::real_1d_array
+ControlAllocation::matrixToAlglib(const matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> &m)
+{
+	alglib::real_1d_array c;
+	int t=12, i , j;
+	c.setlength(t);
+	for ( j = 0; j < t; j++)
+	{
+		c[i] = m(i, j);
+	}
+	return c;
+}
 matrix::Matrix<float, ControlAllocation::NUM_AXES, ControlAllocation::NUM_ACTUATORS>
 ControlAllocation::alglibToMatrix(const alglib::real_2d_array &m)
 {
@@ -280,6 +292,7 @@ ControlAllocation::alglibToMatrix(const alglib::real_2d_array &m)
 	return c;
 }
 
+
 void ControlAllocation::printAlglib(const alglib::real_2d_array &a)
 {
 	int i, j;
@@ -291,4 +304,14 @@ void ControlAllocation::printAlglib(const alglib::real_2d_array &a)
 		}
 		printf("\n");
 	}
+}
+
+void ControlAllocation::printAlglib(const alglib::real_1d_array &a)
+{
+	int i;
+	for ( i = 0; i < a.length(); i++)
+	{
+		printf("\t %.6f, ", double(a(i)));
+	}
+	printf("\n");
 }

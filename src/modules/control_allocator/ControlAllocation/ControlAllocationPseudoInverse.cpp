@@ -65,53 +65,12 @@ ControlAllocationPseudoInverse::allocate()
 {
 	//Compute new gains if needed
 	updatePseudoInverse();
-	_optimize_allocation();
+	// _optimize_sample();
 
 	// Allocate
 	// _actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
 
-	 // ADDED
-	// _vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
-	// float act_known[NUM_ACTUATORS];
-	// int cnt = 0;
-	// for(int i = 0; i < NUM_ACTUATORS; ++i) {
-	// 	if (i == known_ind[cnt]) {
-	// 		act_known[i] = _actuator_trim_known(i);
-	// 		cnt++;
-	// 	}
-	// 	else{
-	// 		act_known[i] = 0.0f;
-	// 	}
-	// }
-	// _actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(act_known);
-	// _control_known_sp = _effectiveness_known * _actuator_known_sp;
-
-
-	// _actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
-
-	// const float act_sp[NUM_ACTUATORS] = _actuator_unknown_sp + _actuator_known_sp;
-
-	// _actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
 	_actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
-	// printf("_mix:\n");
-	// _mix.T().print();
-
-	// if(_vtol_vehicle_status.vtol_in_trans_mode)
-	// {
-	// 	_actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
-	// }
-
-	// ADDED
-	// printf("_actuator_trim + _mix * (_control_sp - _control_trim):\n");
-	// (_actuator_trim + _mix * (_control_sp - _control_trim)).T().print();
-	// printf("_actuator_known_sp:\n");
-	// _actuator_known_sp.T().print();
-	// printf("_actuator_unknown_sp:\n");
-	// _actuator_unknown_sp.T().print();
-
-
-
-
 
 	// Clip
 	clipActuatorSetpoint(_actuator_sp);
@@ -120,20 +79,6 @@ ControlAllocationPseudoInverse::allocate()
 	_control_allocated =  _effectiveness * _actuator_sp;
 	matrix::Vector<float, NUM_AXES> _control_unallocated;
 	_control_unallocated = (_control_sp - _control_allocated);
-	// printf("_actuator_sp:\n");
-	// _actuator_sp.T().print();
-	// printf("_control_sp:\n");
-	// _control_sp.T().print();
-	// printf("_control_allocated:\n");
-	// _control_allocated.T().print();
-	// printf("_control_trim:\n");
-	// _control_trim.T().print();
-	// printf("_effectiveness:\n");
-	// _effectiveness.T().print();
-	// printf("_effectiveness_unknown:\n");
-	// _effectiveness_unknown.T().print();
-	// printf("nullspace = \n");
-	// _nullspace.print();
 
 	if (_actuator_failure_id) {
 		float act_known[NUM_ACTUATORS];
@@ -156,73 +101,65 @@ ControlAllocationPseudoInverse::allocate()
 
 		_control_allocated =  _effectiveness * _actuator_sp;
 		_control_unallocated = (_control_sp - _control_allocated);
-		// printf("_actuator_sp:\n");
-		// _actuator_sp.T().print();
-		// printf("_actuator_trim:\n");
-		// _actuator_trim.T().print();
-		// printf("_control_sp:\n");
-		// _control_sp.T().print();
-		// printf("_effectiveness:\n");
-		// _effectiveness.T().print();
-		// printf("_effectiveness_known:\n");
-		// _effectiveness_known.T().print();
-		// matrix::Vector<float, NUM_AXES> _control_unallocated;
-		// _control_unallocated = (_control_sp - _control_allocated);
 
-		// printf("failure: %d, value = %f\n", _actuator_failure_id, double(_actuator_failure_val));
-		int cnter = 0;
-		int cnt_thresh = 400;
-		double Mnorm, Fnorm;
-		Mnorm = _control_unallocated(0)*_control_unallocated(0) + _control_unallocated(1)*_control_unallocated(1) + _control_unallocated(2)*_control_unallocated(2);
-		// Fnorm = _control_unallocated(3)*_control_unallocated(3) + _control_unallocated(4)*_control_unallocated(4) + _control_unallocated(5)*_control_unallocated(5);
-		// printf("Mnorm = %f, Fnorm = %f\n", Mnorm, Fnorm);
-		// if (_actuator_failure_id > 8)
-		// {
-
-			// while ((_control_unallocated.norm() > float(0.01)) && cnter < cnt_thresh) {
-			while (((Mnorm > 0.01) || (Fnorm > 1)) && cnter < cnt_thresh) {
-				_actuator_unallocated_sp =  _mix_unknown * (_control_unallocated - _control_known_sp);
-				_actuator_sp += _actuator_unallocated_sp;
-				clipActuatorSetpoint(_actuator_sp);
-				_control_allocated = _effectiveness * _actuator_sp;
-				_control_unallocated = (_control_sp - _control_allocated);
-				// printf("here re-allocate!: %f\n", double(_control_unallocated.norm()));
-				cnter++;
+		matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_opt;
+		float act_opt[NUM_ACTUATORS - 4];
+		for (int i = 0; i < NUM_ACTUATORS - 4; i++)
+		{
+			act_opt[i] = _actuator_sp(i);
+		}
+		_actuator_opt = matrix::Vector<float, NUM_ACTUATORS - 4> (act_opt);
+		matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint;
+		linear_constraint = _actuator_opt.T() * _nullspace * 2;
+		_optimize_allocation(linear_constraint, _actuator_opt);
+		printf("optimizing here!\n");
+		_last_lambda_sol = _lambda_sol;
+		_last_lambda_init = true;
+		matrix::Vector<float, NUM_ACTUATORS - 4> _lambda;
+		int i;
+		for (i = 0; i < NUM_ACTUATORS - 4; i++)
+		{
+			if(i < _null_size)
+			{
+				_lambda(i) = _lambda_sol(i);
 			}
-			// printf("\n\n");
-		// }
-		// printf("norm = %f\n", double(_control_unallocated.norm()));
-		// else {
-		// 	// while (((Mnorm > 0.2) || (Fnorm > 2)) && cnter < cnt_thresh) {
-		// 	while ((_control_unallocated.norm() > float(0.1)) && cnter < cnt_thresh) {
-		// 		_actuator_unallocated_sp =  _mix * _control_unallocated;
-		// 		_actuator_sp += _actuator_unallocated_sp;
-		// 		clipActuatorSetpoint(_actuator_sp); // TODO: make sure this is scale and clip
-		// 		_control_allocated = _effectiveness * _actuator_sp;
-		// 		_control_unallocated = (_control_sp - _control_allocated);
-		// 		// printf("here re-allocate!: %f\n", double(_control_unallocated.norm()));
-		// 		cnter++;
-		// 	}
-		// 	// printf("\n\n");
-		// }
-		// printf("\nreallocated_actuator_sp:\n");
-		// _actuator_sp.T().print();
-		// printf("\n\n\n");
+			else
+			{
+				_lambda(i) = 0.0f;
+			}
+
+		}
+		matrix::Vector<float, NUM_ACTUATORS> _actuator_optimized;
+		for (i = 0; i < NUM_ACTUATORS; i++)
+		{
+			if(i < NUM_ACTUATORS - 4)
+			{
+				_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 4>(_nullspace * _lambda)(i);
+			}
+		}
+		if(!isnan(_actuator_optimized(0)))
+		{
+			_actuator_sp +=_actuator_optimized;
+		}
+
 	}
-	// printf("\nreallocated_actuator_sp:\n");
-	// 	_actuator_sp.T().print();
-	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
-	_airspeed_validated_sub.update(&_airspeed_validated);
-	// printf("airspeed = %f, Roll = %f, Pitch = %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.roll), double(_vtol_vehicle_status.pitch));
-	// printf("c(3) =\t%.2f, c(4) =\t%.2f, c(5) =\t%.2f\n", double(_control_sp(3)), double(_control_sp(4)), double(_control_sp(5)) );
-	cFile.open("myFile.csv", std::ios_base::app);
-	cFile << std::endl << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<< std::endl;
-	cFile.close();
-	// printf("un allocated = %f\n", double(_control_unallocated.norm()));
+	printf("_act_sp\n");
+	_actuator_sp.T().print();
+
+	// printf("max:\n");
+	// _actuator_max.T().print();
+	// printf("min:\n");
+	// _actuator_min.T().print();
+	// // Save into csv TODO: add a QGC bool param to control save or not save
+	// _vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+	// _airspeed_validated_sub.update(&_airspeed_validated);
+	// cFile.open("myFile.csv", std::ios_base::app);
+	// cFile << std::endl << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<< std::endl;
+	// cFile.close();
 
 }
 
-void ControlAllocationPseudoInverse::_optimize_allocation()
+void ControlAllocationPseudoInverse::_optimize_sample()
 {
 // This example demonstrates minimization of nonconvex function
 //     F(x0,x1) = -(x0^2+x1^2)
@@ -245,19 +182,27 @@ void ControlAllocationPseudoInverse::_optimize_allocation()
 // and pass diag(-2,-2) as quadratic term - NOT diag(-1,-1)!
 //
 	alglib::real_2d_array a;
-	double data_2_2[4] = {-2.0, 0.0, 0.0, -2.0};
+	double data_2_2[4] = {2.0, 0.0, 0.0, 2.0};
 	a.setcontent(2, 2, data_2_2);
+	alglib::real_1d_array b;
+	double data_2[2] = {-6.0, -4.0};
+	b.setcontent(2, data_2);
 	alglib::real_1d_array x0;
-	double data_2[2] = {1.0, 1.0};
+	data_2[0] = 0.0;
+	data_2[1] = 1.0;
 	x0.setcontent(2, data_2);
 	alglib::real_1d_array s;
+	data_2[0] = 1.0;
 	s.setcontent(2, data_2);
 	alglib::real_1d_array bndl;
+	data_2[0] = 0.0;
+	data_2[1] = 0.0;
 	bndl.setcontent(2, data_2);
 	alglib::real_1d_array bndu;
-	data_2[0] = 2.0;
-	data_2[1] = 2.0;
+	data_2[0] = 2.5;
+	data_2[1] = 2.5;
 	bndu.setcontent(2, data_2);
+
 
 	alglib::real_1d_array x;
 	alglib::minqpstate state;
@@ -265,17 +210,113 @@ void ControlAllocationPseudoInverse::_optimize_allocation()
 	alglib_impl::ae_state_init(&_state);
 	alglib::minqpreport rep;
 
-	// alglib_impl::minqpcreate(2, const_cast<alglib_impl::minqpstate*>(state.c_ptr()), &_state);
+
 	alglib::minqpcreate(2, state);
 	alglib_impl::minqpsetquadraticterm(const_cast<alglib_impl::minqpstate*>(state.c_ptr()), const_cast<alglib_impl::ae_matrix*>(a.c_ptr()), isupper, &_state);
+	alglib::minqpsetlinearterm(state, b);
 	alglib::minqpsetstartingpoint(state, x0);
 	alglib::minqpsetbc(state, bndl, bndu);
 
 	alglib::minqpsetscale(state, s);
 
+	// Uncomment to use BLEIC optimization method
 	// minqpsetalgobleic(state, 0.0, 0.0, 0.0, 0);
 	alglib::minqpsetalgoquickqp(state, 0.0, 0.0, 0.0, 0, true);
 	alglib::minqpoptimize(state);
 	alglib::minqpresults(state, x, rep);
-	printf("solution = [%f, %f]\n", x[0], x[1]); // EXPECTED: [2,2]
+	printf("solution = [%f, %f]\n", x[0], x[1]); // EXPECTED: [2.5,2]
+}
+
+void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt)
+{
+
+	alglib::real_2d_array a;
+	a.setlength(_null_size, _null_size);
+	double zeros[_null_size*_null_size] = {0};
+	a.setcontent(_null_size, _null_size, zeros);
+	for (int i = 0; i < _null_size; i++)
+	{
+		a(i, i) = 2.0;
+	}
+	alglib::real_1d_array b = matrixToAlglib(linear_constraint);
+	alglib::real_1d_array x0;
+	double x0_arr[_null_size];
+	for (int i = 0; i < _null_size; i++)
+	{
+		if(!_last_lambda_init)
+		{
+			x0_arr[i] = 1;
+		}
+		else
+		{
+			x0_arr[i] = _last_lambda_sol(i);
+		}
+
+		// x0_arr[i] = actuator_opt(i); // TODO: find the best starting values
+
+	}
+	x0.setcontent(_null_size, x0_arr);
+	alglib::real_2d_array C;
+	alglib::integer_1d_array ct;
+	C.setlength(24, _null_size + 1);
+	ct.setlength(24);
+	int i, j;
+	for (i = 0; i < 24; i++)
+	{
+		for (j = 0; j < _null_size + 1; j++)
+		{
+			// RHS of constraint
+			if(j == _null_size)
+			{
+				if(i < 12)
+				{
+					C(i, j) = _actuator_max(i) - actuator_opt(i);
+					ct(i) = -1;
+				}
+				else
+				{
+					C(i, j) = _actuator_min(i%12) - actuator_opt(i%12);
+					ct(i) = 1;
+				}
+
+			}
+			// LHS of constraint
+			else
+			{
+				C(i, j) = _nullspace(i%12, j);
+			}
+
+		}
+
+	}
+	// printf("constraints:\n");
+	// printAlglib(C);
+	alglib::real_1d_array x;
+	alglib::minqpstate state;
+	alglib_impl::ae_state _state;
+	alglib_impl::ae_state_init(&_state);
+	alglib_impl::ae_state _lc_state;
+	alglib_impl::ae_state_init(&_lc_state);
+	alglib::minqpreport rep;
+
+	alglib::minqpcreate(_null_size, state);
+	alglib_impl::minqpsetquadraticterm(const_cast<alglib_impl::minqpstate*>(state.c_ptr()), const_cast<alglib_impl::ae_matrix*>(a.c_ptr()), isupper, &_state);
+	alglib::minqpsetstartingpoint(state, x0);
+
+	// alglib::minqpsetlc(state, C, ct);
+	alglib_impl::minqpsetlc(const_cast<alglib_impl::minqpstate*>(state.c_ptr()), const_cast<alglib_impl::ae_matrix*>(C.c_ptr()), const_cast<alglib_impl::ae_vector*>(ct.c_ptr()), C.rows(), &_lc_state);
+
+	// Set scale: currectly set to 1/sqrt(diag(a)) TODO: uncomment the commented one and find the best scaling factors
+	// alglib::minqpsetscale(state, s);
+	alglib::minqpsetscaleautodiag(state);
+
+	alglib::minqpsetalgobleic(state, 0.0001, 0.1, 0.1, 1000);
+	// alglib::minqpsetalgoquickqp(state, 0.001, 0.1, 0.1, 1000, true);
+	alglib::minqpoptimize(state);
+	alglib::minqpresults(state, x, rep);
+	// printf("solution = \n");
+	// printAlglib(x);
+	printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+	_lambda_sol = x;
+
 }
