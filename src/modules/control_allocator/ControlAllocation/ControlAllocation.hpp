@@ -243,8 +243,9 @@ public:
 	 *
 	 * @return Converted matrix
 	 */
-	alglib::real_2d_array matrixToAlglib(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m);
+	alglib::real_2d_array matrixToAlglib(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> &m, int size);
 	alglib::real_1d_array matrixToAlglib(const matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> &m);
+	alglib::real_2d_array matrixToAlglib(const matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS - 5> &m);
 
 	/**
 	 * Author: Mohammad
@@ -255,6 +256,7 @@ public:
 	 * @return Converted matrix
 	 */
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> alglibToMatrix(const alglib::real_2d_array &m);
+
 
 	void printAlglib(const alglib::real_2d_array &a);
 	void printAlglib(const alglib::real_1d_array &a);
@@ -277,6 +279,7 @@ public:
 protected:
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> _effectiveness;  //< Effectiveness matrix
 	matrix::Matrix<float, NUM_ACTUATORS - 4, NUM_ACTUATORS - 4> _nullspace;  //< Effectiveness matrix
+	matrix::Matrix<float, NUM_ACTUATORS - 5, NUM_ACTUATORS - 4> _nullspace_failed;  //< Effectiveness matrix
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_trim; 	//< Neutral actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_min; 	//< Minimum actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_max; 	//< Maximum actuator values

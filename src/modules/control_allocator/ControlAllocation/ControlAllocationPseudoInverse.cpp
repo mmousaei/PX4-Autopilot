@@ -112,7 +112,7 @@ ControlAllocationPseudoInverse::allocate()
 		matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint;
 		linear_constraint = _actuator_opt.T() * _nullspace * 2;
 		_optimize_allocation(linear_constraint, _actuator_opt);
-		printf("optimizing here!\n");
+		// printf("optimizing here!\n");
 		_last_lambda_sol = _lambda_sol;
 		_last_lambda_init = true;
 		matrix::Vector<float, NUM_ACTUATORS - 4> _lambda;
@@ -134,7 +134,20 @@ ControlAllocationPseudoInverse::allocate()
 		{
 			if(i < NUM_ACTUATORS - 4)
 			{
-				_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 4>(_nullspace * _lambda)(i);
+				if(i < (_actuator_failure_id-1))
+				{
+					_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 5>(_nullspace_failed * _lambda)(i);
+				}
+				else if (i == (_actuator_failure_id-1))
+				{
+					_actuator_optimized(i) = 0.f;
+				}
+				else
+				{
+					_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 5>(_nullspace_failed * _lambda)(i-1);
+				}
+
+
 			}
 		}
 		if(!isnan(_actuator_optimized(0)))
@@ -258,24 +271,41 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 	x0.setcontent(_null_size, x0_arr);
 	alglib::real_2d_array C;
 	alglib::integer_1d_array ct;
-	C.setlength(24, _null_size + 1);
-	ct.setlength(24);
+	int constraint_size;
+	if(_actuator_failure_id) constraint_size = 22;
+	else 	constraint_size = 24;
+	C.setlength(constraint_size, _null_size + 1);
+	ct.setlength(constraint_size);
 	int i, j;
-	for (i = 0; i < 24; i++)
+	for (i = 0; i < constraint_size; i++)
 	{
 		for (j = 0; j < _null_size + 1; j++)
 		{
 			// RHS of constraint
 			if(j == _null_size)
 			{
-				if(i < 12)
+				if(i < (constraint_size/2))
 				{
-					C(i, j) = _actuator_max(i) - actuator_opt(i);
+					if(i < (_actuator_failure_id-1))
+					{
+						C(i, j) = _actuator_max(i) - actuator_opt(i);
+					}
+					else
+					{
+						C(i, j) = _actuator_max(i+1) - actuator_opt(i+1);
+					}
 					ct(i) = -1;
 				}
 				else
 				{
-					C(i, j) = _actuator_min(i%12) - actuator_opt(i%12);
+					if((i%(constraint_size/2)) < (_actuator_failure_id-1))
+					{
+						C(i, j) = _actuator_min(i%(constraint_size/2)) - actuator_opt(i%(constraint_size/2));
+					}
+					else
+					{
+						C(i, j) = _actuator_max((i%(constraint_size/2))+1) - actuator_opt((i%(constraint_size/2))+1);
+					}
 					ct(i) = 1;
 				}
 
@@ -283,7 +313,7 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 			// LHS of constraint
 			else
 			{
-				C(i, j) = _nullspace(i%12, j);
+				C(i, j) = _nullspace(i%(constraint_size/2), j);
 			}
 
 		}
@@ -316,7 +346,7 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 	alglib::minqpresults(state, x, rep);
 	// printf("solution = \n");
 	// printAlglib(x);
-	printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+	// printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
 	_lambda_sol = x;
 
 }
