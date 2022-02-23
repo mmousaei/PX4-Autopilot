@@ -8,7 +8,7 @@ cd PX4-Autopilot
 git checkout mmousaei/cmu_add_v2
 git submodule sync
 git submodule update --init --recursive --remote
-make px4_sitl gazebo_needle
+make px4_sitl_ctrlalloc gazebo_needle
 ```
 
 
