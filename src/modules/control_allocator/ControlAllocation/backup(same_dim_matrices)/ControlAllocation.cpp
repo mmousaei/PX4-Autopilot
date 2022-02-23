@@ -82,7 +82,7 @@ ControlAllocation::setEffectivenessMatrix(
 										{_effectiveness(0, 5), _effectiveness(1, 5), _effectiveness(2, 5), _effectiveness(3, 5),0.0f,0.0f,0.0f,0.0f, _effectiveness(8, 5), _effectiveness(9, 5), _effectiveness(10, 5), _effectiveness(11, 5),0.0f,0.0f,0.0f,0.0f}
 									};
 	_effectiveness_unknown = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> (eff_unknown);
-	
+
 	_control_trim_known = _effectiveness_known * _actuator_trim_known;
 	_control_trim_unknown = _effectiveness_unknown * _actuator_trim_unknown;
 	// for(int i = 0; i < NUM_KNOWN; ++i) {
@@ -92,7 +92,7 @@ ControlAllocation::setEffectivenessMatrix(
 	// 	printf("_actuator_trim_unknown(%d) = %.3f\n", i , double(_actuator_trim_unknown(i)));
 	// }
 	// printf("effectiveness known = \n");
-	
+
 	// 		printf("%.3f, ", double(_effectiveness_known(0, 0)));
 	// 		printf("%.3f, ", double(_effectiveness_known(0, 1)));
 	// 		printf("%.3f, ", double(_effectiveness_known(0, 2)));
@@ -124,7 +124,7 @@ ControlAllocation::setEffectivenessMatrix(
 	// printf("\n");
 
 	// printf("effectiveness unknown = \n");
-	
+
 	// 		printf("%.3f, ", double(_effectiveness_unknown(0, 0)));
 	// 		printf("%.3f, ", double(_effectiveness_unknown(0, 1)));
 	// 		printf("%.3f, ", double(_effectiveness_unknown(0, 2)));
@@ -181,7 +181,7 @@ ControlAllocation::setEffectivenessMatrix(
 	// 		printf("%.3f, ", double(_effectiveness_unknown(7, 4)));
 	// 		printf("%.3f, ", double(_effectiveness_unknown(7, 5)));
 	// 		printf("\n");
-			
+
 	// printf("\n");
 
 
@@ -238,6 +238,11 @@ const
 
 		} else {
 			actuator_normalized(i) = -1.0f + 2.0f * (_actuator_trim(i) - _actuator_min(i)) / (_actuator_max(i) - _actuator_min(i));
+		}
+		// Mohammad (change normalized )
+		if( i >= 4 && i < 8)
+		{
+			actuator_normalized(i) = actuator(i);
 		}
 	}
 

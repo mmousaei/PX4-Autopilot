@@ -211,6 +211,7 @@ public:
 	 * @param actuator Actuator vector to clip
 	 */
 	void clipActuatorSetpoint(matrix::Vector<float, NUM_ACTUATORS> &actuator) const;
+	void scaleActuatorSetpoint(matrix::Vector<float, NUM_ACTUATORS> &actuator) const;
 
 	/**
 	 * Normalize the actuator setpoint between minimum and maximum values.

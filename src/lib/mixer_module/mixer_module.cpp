@@ -459,11 +459,6 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 			if(i < 4) actuator_outputs.output[i] = int(1100 * param_vtol_failure_val + 900);
 			else if (i >= 4 && i < 8) actuator_outputs.output[i] = int(1000 * param_vtol_failure_val + 1000);
 			else if (i >= 8) actuator_outputs.output[i] = int(500 * param_vtol_failure_val + 1500);
-
-			// if(i < 13 && i > 4) actuator_outputs.output[i] = 1500;
-			// else if (i < 4) actuator_outputs.output[i] = 1600;
-			// if(i == 10) actuator_outputs.output[i] = 1600;
-			// if (i > 4 && i <= 8) actuator_outputs.output[i] = 1600;
 		}
 		// else
 		// {
@@ -472,7 +467,7 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 
 	}
 	// printf("motor value = %d\n", int(actuator_outputs.output[0]));
-	// printf("tilt value = %d\n", int(actuator_outputs.output[5]));
+	// printf("tilt value = %d\n", int(actuator_outputs.output[4]));
 	// printf("aileron value = %d\n", int(actuator_outputs.output[9]));
 	// printf("elevator value = %d\n", int(actuator_outputs.output[10]));
 	actuator_outputs.timestamp = hrt_absolute_time();

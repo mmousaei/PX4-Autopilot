@@ -121,7 +121,8 @@
         {
             "label": "gazebo build",
             "type": "shell",
-            "command": "make px4_sitl_default sitl_gazebo",
+            // "command": "make px4_sitl_default sitl_gazebo",
+            "command": "make px4_sitl gazebo_tiltrotor_ctrlalloc",
             "options": {
                 "cwd": "${workspaceFolder}"
             },

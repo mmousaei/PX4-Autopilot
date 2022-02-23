@@ -76,10 +76,10 @@ ControlAllocation::setEffectivenessMatrix(
 		}
 
 	}
-	printf("nullspace:\n");
-	_nullspace.print();
-	printf("nullspace failed:\n");
-	_nullspace_failed.print();
+	// printf("nullspace:\n");
+	// _nullspace.print();
+	// printf("nullspace failed:\n");
+	// _nullspace_failed.print();
 	_actuator_trim = actuator_trim;
 	clipActuatorSetpoint(_actuator_trim);
 	_control_trim = _effectiveness * _actuator_trim;
@@ -161,6 +161,23 @@ ControlAllocation::setActuatorSetpoint(
 void
 ControlAllocation::clipActuatorSetpoint(matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator) const
 {
+	for (int i = 0; i < _num_actuators; i++) {
+		if (_actuator_max(i) < _actuator_min(i)) {
+		actuator(i) = _actuator_trim(i);
+
+		} else if (actuator(i) < _actuator_min(i)) {
+			actuator(i) = _actuator_min(i);
+
+		} else if (actuator(i) > _actuator_max(i)) {
+			actuator(i) = _actuator_max(i);
+		}
+
+	}
+}
+
+void
+ControlAllocation::scaleActuatorSetpoint(matrix::Vector<float, ControlAllocation::NUM_ACTUATORS> &actuator) const
+{
 	float mx = -100000.f;
 	float mn = 100000.f;
 	float eps = 0.01;
@@ -218,6 +235,11 @@ const
 		} else {
 			actuator_normalized(i) = -1.0f + 2.0f * (_actuator_trim(i) - _actuator_min(i)) / (_actuator_max(i) - _actuator_min(i));
 		}
+	// Mohammad (change normalized )
+		if( i >= 4 && i < 8)
+		{
+			actuator_normalized(i) = -1 + 2*actuator(i);
+		}
 	}
 
 	return actuator_normalized;
@@ -247,8 +269,8 @@ ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::N
 	}
 
 	alglib::real_2d_array b= matrixToAlglib(CA, sz);
-	printf("ca;\n");
-	printAlglib(b);
+	// printf("ca;\n");
+	// printAlglib(b);
 	alglib::real_2d_array a= matrixToAlglib(CA, sz);
 	alglib::ae_int_t vtneeded = 2; // Determines if vt matrix is needed
 	alglib::ae_int_t uneeded = 1; // Determines if u matrix is needed
@@ -267,7 +289,7 @@ ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::N
 	alglib::real_2d_array u;
 	// rmatrixsvd: find A = U W V^T
 	bool success2 = alglib::rmatrixsvd(b, b.rows(), b.cols(), uneeded, vtneeded, additionalmemory, w, u, vt);
-	printf("u size = (%d, %d)\nvt size = (%d, %d)\n", u.rows(), u.cols(), vt.rows(), vt.cols());
+	// printf("u size = (%d, %d)\nvt size = (%d, %d)\n", u.rows(), u.cols(), vt.rows(), vt.cols());
 
 	bool success = alglib::rmatrixsvd(a, a.rows(), a.cols(), uneeded, vtneeded, additionalmemory, w, u, vt);
 
@@ -282,7 +304,7 @@ ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::N
 		}
 	}
 	nullsize -= non_zero_eigens;
-	printf("nullsize = %d\n", nullsize);
+	// printf("nullsize = %d\n", nullsize);
 
 	for(int i = 0; i < sz; ++i) {
 		for(int j = 0; j < nullsize; ++j) {

@@ -70,6 +70,7 @@ private:
 	alglib::real_1d_array _lambda_sol;
 	alglib::real_1d_array _last_lambda_sol;
 	bool _last_lambda_init = false;
+	int mx = -100;
 	void _optimize_sample();
 	void _optimize_allocation(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt);
 

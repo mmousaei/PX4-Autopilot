@@ -54,9 +54,11 @@ param set-default MPC_XY_VEL_P_ACC 3
 param set-default MPC_XY_VEL_I_ACC 4
 param set-default MPC_XY_VEL_D_ACC 0.1
 param set-default MPC_Z_VEL_MAX_DN 1.5
-param set AVC_Y_P 22.0
-param set AVC_Y_K 1.0
-param set AVC_X_P 30.0
+param set AVC_Y_P 20.0
+param set AVC_Y_K 2.0
+param set AVC_X_P 20.0
+param set AVC_X_K 2.0
+param set AVC_Z_K 5.0
 param set AVC_Z_P 20.0
 param set AVC_Y_I 0.6
 param set AVC_X_I 0.3
@@ -93,20 +95,20 @@ param set-default CA_ACT1_MIN 0
 param set-default CA_ACT2_MIN 0
 param set-default CA_ACT3_MIN 0
 
-param set-default CA_ACT0_MAX 1
-param set-default CA_ACT1_MAX 1
-param set-default CA_ACT2_MAX 1
-param set-default CA_ACT3_MAX 1
+param set-default CA_ACT0_MAX 1.0
+param set-default CA_ACT1_MAX 1.0
+param set-default CA_ACT2_MAX 1.0
+param set-default CA_ACT3_MAX 1.0
 # tilts
-param set-default CA_ACT4_MIN -0.2
-param set-default CA_ACT5_MIN -0.2
-param set-default CA_ACT6_MIN -0.2
-param set-default CA_ACT7_MIN -0.2
+param set-default CA_ACT4_MIN -1.0
+param set-default CA_ACT5_MIN -1.0
+param set-default CA_ACT6_MIN -1.0
+param set-default CA_ACT7_MIN -1.0
 
-param set-default CA_ACT4_MAX 1.2
-param set-default CA_ACT5_MAX 1.2
-param set-default CA_ACT6_MAX 1.2
-param set-default CA_ACT7_MAX 1.2
+param set-default CA_ACT4_MAX 1.0
+param set-default CA_ACT5_MAX 1.0
+param set-default CA_ACT6_MAX 1.0
+param set-default CA_ACT7_MAX 1.0
 # ailerons
 param set-default CA_ACT8_MIN -1.0
 param set-default CA_ACT9_MIN -1.0

@@ -73,12 +73,14 @@ ControlAllocationPseudoInverse::allocate()
 	_actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
 
 	// Clip
-	clipActuatorSetpoint(_actuator_sp);
+	// clipActuatorSetpoint(_actuator_sp);
 
 	// Compute achieved control
 	_control_allocated =  _effectiveness * _actuator_sp;
 	matrix::Vector<float, NUM_AXES> _control_unallocated;
 	_control_unallocated = (_control_sp - _control_allocated);
+
+
 
 	if (_actuator_failure_id) {
 		float act_known[NUM_ACTUATORS];
@@ -101,6 +103,8 @@ ControlAllocationPseudoInverse::allocate()
 
 		_control_allocated =  _effectiveness * _actuator_sp;
 		_control_unallocated = (_control_sp - _control_allocated);
+		// printf("unallocated control:\n");
+		// _control_unallocated.T().print();
 
 		matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_opt;
 		float act_opt[NUM_ACTUATORS - 4];
@@ -113,8 +117,16 @@ ControlAllocationPseudoInverse::allocate()
 		linear_constraint = _actuator_opt.T() * _nullspace * 2;
 		_optimize_allocation(linear_constraint, _actuator_opt);
 		// printf("optimizing here!\n");
-		_last_lambda_sol = _lambda_sol;
-		_last_lambda_init = true;
+		bool isNan_opt = false;
+		for (size_t i = 0; i < _null_size; i++)
+		{
+			if(isnan(_lambda_sol(i))) isNan_opt = true;
+		}
+		if(!isNan_opt)
+		{
+			_last_lambda_sol = _lambda_sol;
+			_last_lambda_init = true;
+		}
 		matrix::Vector<float, NUM_ACTUATORS - 4> _lambda;
 		int i;
 		for (i = 0; i < NUM_ACTUATORS - 4; i++)
@@ -150,12 +162,18 @@ ControlAllocationPseudoInverse::allocate()
 
 			}
 		}
-		if(!isnan(_actuator_optimized(0)))
+
+		if(!isNan_opt)
 		{
 			_actuator_sp +=_actuator_optimized;
 		}
 
 	}
+	clipActuatorSetpoint(_actuator_sp);
+	_control_allocated =  _effectiveness * _actuator_sp;
+	_control_unallocated = (_control_sp - _control_allocated);
+	printf("unallocated control:\n");
+	_control_unallocated.T().print();
 	printf("_act_sp\n");
 	_actuator_sp.T().print();
 
@@ -269,11 +287,17 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 
 	}
 	x0.setcontent(_null_size, x0_arr);
+	alglib::real_1d_array s;
+	s.setlength(_null_size);
+	for (size_t i = 0; i < _null_size; i++)
+	{
+		s(i) = 12.8;
+	}
+
 	alglib::real_2d_array C;
 	alglib::integer_1d_array ct;
 	int constraint_size;
-	if(_actuator_failure_id) constraint_size = 22;
-	else 	constraint_size = 24;
+	if(_actuator_failure_id) constraint_size = 22; else constraint_size = 24;
 	C.setlength(constraint_size, _null_size + 1);
 	ct.setlength(constraint_size);
 	int i, j;
@@ -304,7 +328,7 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 					}
 					else
 					{
-						C(i, j) = _actuator_max((i%(constraint_size/2))+1) - actuator_opt((i%(constraint_size/2))+1);
+						C(i, j) = _actuator_min((i%(constraint_size/2))+1) - actuator_opt((i%(constraint_size/2))+1);
 					}
 					ct(i) = 1;
 				}
@@ -313,14 +337,28 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 			// LHS of constraint
 			else
 			{
-				C(i, j) = _nullspace(i%(constraint_size/2), j);
+				if(_actuator_failure_id)
+				{
+					C(i, j) = _nullspace_failed(i%(constraint_size/2), j);
+				}
+				else
+				{
+					C(i, j) = _nullspace(i%(constraint_size/2), j);
+				}
+
 			}
 
 		}
 
 	}
+	// printf("null:\n");
+	// _nullspace_failed.print();
 	// printf("constraints:\n");
 	// printAlglib(C);
+	// printf("linear:\n");
+	// printAlglib(b);
+	// printf("x0:\n");
+	// printAlglib(x0);
 	alglib::real_1d_array x;
 	alglib::minqpstate state;
 	alglib_impl::ae_state _state;
@@ -340,13 +378,16 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 	// alglib::minqpsetscale(state, s);
 	alglib::minqpsetscaleautodiag(state);
 
-	alglib::minqpsetalgobleic(state, 0.0001, 0.1, 0.1, 1000);
-	// alglib::minqpsetalgoquickqp(state, 0.001, 0.1, 0.1, 1000, true);
+	alglib::minqpsetalgobleic(state, 0.2, 0.2, 0.2, 0);
+	// alglib::minqpsetalgoquickqp(state, 0.001, 0.001, 0.001, 0, true);
 	alglib::minqpoptimize(state);
 	alglib::minqpresults(state, x, rep);
-	// printf("solution = \n");
-	// printAlglib(x);
-	// printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+
+	if(rep.inneriterationscount > mx) mx = rep.inneriterationscount;
+	printf("solution = \n");
+	printAlglib(x);
+	printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+	printf("max iter = %d\n", mx);
 	_lambda_sol = x;
 
 }

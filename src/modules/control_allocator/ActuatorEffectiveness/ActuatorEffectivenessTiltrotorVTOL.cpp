@@ -84,6 +84,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 
 	airspeed = float(_airspeed_validated.calibrated_airspeed_m_s);
 	tilt = float(_vtol_vehicle_status.tiltrotor_tilt);
+	// printf("tilt = %f\n", tilt);
 	// _trim(0) = 0.5f;
 	// _trim(1) = 0.5f;
 	// _trim(2) = 0.5f;
