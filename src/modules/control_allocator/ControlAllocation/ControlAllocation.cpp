@@ -305,10 +305,11 @@ ControlAllocation::getNullSpace(const matrix::Matrix<float, ControlAllocation::N
 	}
 	nullsize -= non_zero_eigens;
 	// printf("nullsize = %d\n", nullsize);
-
+	_nullspace_alglib.setlength(sz, nullsize);
 	for(int i = 0; i < sz; ++i) {
 		for(int j = 0; j < nullsize; ++j) {
 			nullspace(i, j) = vt(j + non_zero_eigens, i);
+			_nullspace_alglib(i, j) = vt(j + non_zero_eigens, i);
 		}
 	}
 	// printf("W = [ %f  %f  %f  %f  %f  %f ]\n", w(0), w(1), w(2), w(3), w(4), w(5));
@@ -345,11 +346,65 @@ ControlAllocation::matrixToAlglib(const matrix::Matrix<float, ControlAllocation:
 	}
 	return c;
 }
+alglib::real_2d_array
+ControlAllocation::matrixToAlglib(const matrix::Matrix<float, ControlAllocation::NUM_ACTUATORS - 9, ControlAllocation::NUM_ACTUATORS - 9> &m)
+{
+	alglib::real_2d_array c;
+	int s=7, t=7, i , j;
+	c.setlength(s, t);
+	for ( i = 0; i < s; i++)
+	{
+		for ( j = 0; j < t; j++)
+		{
+			c[i][j] = m(i, j);
+		}
+	}
+	return c;
+}
+alglib::real_2d_array
+ControlAllocation::matrixToAlglib(const matrix::Matrix<float, ControlAllocation::NUM_ACTUATORS - 10, ControlAllocation::NUM_ACTUATORS - 10> &m)
+{
+	alglib::real_2d_array c;
+	int s=6, t=6, i , j;
+	c.setlength(s, t);
+	for ( i = 0; i < s; i++)
+	{
+		for ( j = 0; j < t; j++)
+		{
+			c[i][j] = m(i, j);
+		}
+	}
+	return c;
+}
 alglib::real_1d_array
 ControlAllocation::matrixToAlglib(const matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> &m)
 {
 	alglib::real_1d_array c;
 	int t=12, i , j;
+	c.setlength(t);
+	for ( j = 0; j < t; j++)
+	{
+		c[i] = m(i, j);
+	}
+	return c;
+}
+alglib::real_1d_array
+ControlAllocation::matrixToAlglib(const matrix::Matrix<float, 1,  NUM_ACTUATORS - 9> &m)
+{
+	alglib::real_1d_array c;
+	int t=7, i , j;
+	c.setlength(t);
+	for ( j = 0; j < t; j++)
+	{
+		c[i] = m(i, j);
+	}
+	return c;
+}
+alglib::real_1d_array
+ControlAllocation::matrixToAlglib(const matrix::Matrix<float, 1,  NUM_ACTUATORS - 10> &m)
+{
+	alglib::real_1d_array c;
+	int t=6, i , j;
 	c.setlength(t);
 	for ( j = 0; j < t; j++)
 	{

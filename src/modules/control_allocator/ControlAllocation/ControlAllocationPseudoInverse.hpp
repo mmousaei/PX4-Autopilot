@@ -72,7 +72,9 @@ private:
 	bool _last_lambda_init = false;
 	int mx = -100;
 	void _optimize_sample();
-	void _optimize_allocation(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt);
+	void _create_constraints(alglib::real_2d_array &C, alglib::integer_1d_array &ct);
+	void _optimize_allocation_simple_cost(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt);
+	void _optimize_allocation_err_cost(matrix::Vector<float, NUM_ACTUATORS - 4> actuator_err);
 
 protected:
 	matrix::Matrix<float, NUM_ACTUATORS, NUM_AXES> _mix;

@@ -113,9 +113,12 @@ ControlAllocationPseudoInverse::allocate()
 			act_opt[i] = _actuator_sp(i);
 		}
 		_actuator_opt = matrix::Vector<float, NUM_ACTUATORS - 4> (act_opt);
+		matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_err = matrix::Vector<float, NUM_ACTUATORS - 4> (act_opt);
+		_actuator_err -= _actuator_last;
 		matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint;
 		linear_constraint = _actuator_opt.T() * _nullspace * 2;
-		_optimize_allocation(linear_constraint, _actuator_opt);
+		// _optimize_allocation_simple_cost(linear_constraint, _actuator_opt);
+		_optimize_allocation_err_cost(_actuator_err);
 		// printf("optimizing here!\n");
 		bool isNan_opt = false;
 		for (size_t i = 0; i < _null_size; i++)
@@ -257,8 +260,65 @@ void ControlAllocationPseudoInverse::_optimize_sample()
 	alglib::minqpresults(state, x, rep);
 	printf("solution = [%f, %f]\n", x[0], x[1]); // EXPECTED: [2.5,2]
 }
+void ControlAllocationPseudoInverse::_create_constraints(alglib::real_2d_array &C, alglib::integer_1d_array &ct)
+{
+	int constraint_size;
+	if(_actuator_failure_id) constraint_size = 22; else constraint_size = 24;
+	C.setlength(constraint_size, _null_size + 1);
+	ct.setlength(constraint_size);
+	int i, j;
+	for (i = 0; i < constraint_size; i++)
+	{
+		for (j = 0; j < _null_size + 1; j++)
+		{
+			// RHS of constraint
+			if(j == _null_size)
+			{
+				if(i < (constraint_size/2))
+				{
+					if(i < (_actuator_failure_id-1))
+					{
+						C(i, j) = _actuator_max(i) - _actuator_sp(i);
+					}
+					else
+					{
+						C(i, j) = _actuator_max(i+1) - _actuator_sp(i+1);
+					}
+					ct(i) = -1;
+				}
+				else
+				{
+					if((i%(constraint_size/2)) < (_actuator_failure_id-1))
+					{
+						C(i, j) = _actuator_min(i%(constraint_size/2)) - _actuator_sp(i%(constraint_size/2));
+					}
+					else
+					{
+						C(i, j) = _actuator_min((i%(constraint_size/2))+1) - _actuator_sp((i%(constraint_size/2))+1);
+					}
+					ct(i) = 1;
+				}
 
-void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt)
+			}
+			// LHS of constraint
+			else
+			{
+				if(_actuator_failure_id)
+				{
+					C(i, j) = _nullspace_failed(i%(constraint_size/2), j);
+				}
+				else
+				{
+					C(i, j) = _nullspace(i%(constraint_size/2), j);
+				}
+
+			}
+
+		}
+
+	}
+}
+void ControlAllocationPseudoInverse::_optimize_allocation_simple_cost(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 4> actuator_opt)
 {
 
 	alglib::real_2d_array a;
@@ -296,61 +356,7 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 
 	alglib::real_2d_array C;
 	alglib::integer_1d_array ct;
-	int constraint_size;
-	if(_actuator_failure_id) constraint_size = 22; else constraint_size = 24;
-	C.setlength(constraint_size, _null_size + 1);
-	ct.setlength(constraint_size);
-	int i, j;
-	for (i = 0; i < constraint_size; i++)
-	{
-		for (j = 0; j < _null_size + 1; j++)
-		{
-			// RHS of constraint
-			if(j == _null_size)
-			{
-				if(i < (constraint_size/2))
-				{
-					if(i < (_actuator_failure_id-1))
-					{
-						C(i, j) = _actuator_max(i) - actuator_opt(i);
-					}
-					else
-					{
-						C(i, j) = _actuator_max(i+1) - actuator_opt(i+1);
-					}
-					ct(i) = -1;
-				}
-				else
-				{
-					if((i%(constraint_size/2)) < (_actuator_failure_id-1))
-					{
-						C(i, j) = _actuator_min(i%(constraint_size/2)) - actuator_opt(i%(constraint_size/2));
-					}
-					else
-					{
-						C(i, j) = _actuator_min((i%(constraint_size/2))+1) - actuator_opt((i%(constraint_size/2))+1);
-					}
-					ct(i) = 1;
-				}
-
-			}
-			// LHS of constraint
-			else
-			{
-				if(_actuator_failure_id)
-				{
-					C(i, j) = _nullspace_failed(i%(constraint_size/2), j);
-				}
-				else
-				{
-					C(i, j) = _nullspace(i%(constraint_size/2), j);
-				}
-
-			}
-
-		}
-
-	}
+	_create_constraints(C,ct);
 	// printf("null:\n");
 	// _nullspace_failed.print();
 	// printf("constraints:\n");
@@ -387,6 +393,234 @@ void ControlAllocationPseudoInverse::_optimize_allocation(matrix::Matrix<float, 
 	printf("solution = \n");
 	printAlglib(x);
 	printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+	printf("max iter = %d\n", mx);
+	_lambda_sol = x;
+
+}
+void ControlAllocationPseudoInverse::_optimize_allocation_err_cost(matrix::Vector<float, NUM_ACTUATORS - 4> actuator_err)
+{
+	int sz = 12;
+	if(_actuator_failure_id) sz--;
+	matrix::Matrix<float, NUM_ACTUATORS - 4, NUM_ACTUATORS - 4> W;
+	matrix::Matrix<float, NUM_ACTUATORS - 5, NUM_ACTUATORS - 5> W_failure;
+	double W_motor = 0.8;
+	double W_tilt = 2;
+	double W_surface = 0.2;
+	for (size_t i = 0; i < NUM_ACTUATORS - 4; i++)
+	{
+		if(_actuator_failure_id)
+		{
+			if(i < _actuator_failure_id)
+			{
+				if(i < 4)
+				{
+					W_failure(i, i) = W_motor;
+				}
+				else if(i >= 4 && i < 8)
+				{
+					W_failure(i, i) = W_tilt;
+				}
+				else
+				{
+					W_failure(i, i) = W_surface;
+				}
+			}
+			else if (i > _actuator_failure_id)
+			{
+				if(i < 4)
+				{
+					W_failure(i - 1, i - 1) = W_motor;
+				}
+				else if(i >= 4 && i < 8)
+				{
+					W_failure(i - 1, i - 1) = W_tilt;
+				}
+				else
+				{
+					W_failure(i - 1, i - 1) = W_surface;
+				}
+			}
+		}
+		else
+		{
+			if(i < 4)
+			{
+				W(i, i) = W_motor;
+			}
+			else if(i >= 4 && i < 8)
+			{
+				W(i, i) = W_tilt;
+			}
+			else
+			{
+				W(i, i) = W_surface;
+			}
+		}
+
+	}
+	matrix::Matrix<float, NUM_ACTUATORS - 4, NUM_ACTUATORS - 9> N;
+	matrix::Matrix<float, NUM_ACTUATORS - 5, NUM_ACTUATORS - 10> N_failure;
+	for (size_t i = 0; i < sz; i++)
+	{
+		for (size_t j = 0; j < _null_size; j++)
+		{
+			if(_actuator_failure_id)
+			{
+				N_failure(i, j) = _nullspace_failed(i, j);
+			}
+			else
+			{
+				N(i, j) = _nullspace(i, j);
+			}
+		}
+
+	}
+	matrix::Matrix<float, NUM_ACTUATORS - 9, NUM_ACTUATORS - 9> A;
+	matrix::Matrix<float, NUM_ACTUATORS - 10, NUM_ACTUATORS - 10> A_failure;
+	alglib::real_2d_array a;
+	a.setlength(_null_size, _null_size);
+	if(_actuator_failure_id)
+	{
+		A_failure = N_failure.T() * W_failure * N_failure;
+		for (size_t i = 0; i < _null_size; i++)
+		{
+			for (size_t j = 0; j < _null_size; j++)
+			{
+				a(i, j) = A_failure(i, j);
+			}
+
+		}
+
+		// printf("a_failure  = \n");
+		// printAlglib(a);
+	}
+	else
+	{
+		A = N.T() * W * N;
+		for (size_t i = 0; i < _null_size; i++)
+		{
+			for (size_t j = 0; j < _null_size; j++)
+			{
+				a(i, j) = A_failure(i, j);
+			}
+		}
+		// printf("a  = \n");
+		// printAlglib(a);
+	}
+
+	matrix::Matrix<float, NUM_ACTUATORS - 4, 1> a_err;
+	matrix::Matrix<float, NUM_ACTUATORS - 5, 1> a_err_failure;
+	for (size_t i = 0; i < sz; i++)
+	{
+		if(_actuator_failure_id)
+		{
+			if(i < _actuator_failure_id)
+			{
+				a_err_failure(i, 0) = actuator_err(i);
+			}
+			else
+			{
+				a_err_failure(i, 0) = actuator_err(i+1);
+			}
+
+		}
+		else
+		{
+			a_err(i, 0) = actuator_err(i);
+		}
+
+	}
+	alglib::real_1d_array b;
+	matrix::Matrix<float, 1, NUM_ACTUATORS - 9> linear_term;
+	matrix::Matrix<float, 1, NUM_ACTUATORS - 10> linear_term_failure;
+	b.setlength(_null_size);
+	if(_actuator_failure_id)
+	{
+		linear_term_failure = a_err_failure.T() * W_failure * N_failure;
+		for (size_t i = 0; i < _null_size; i++)
+		{
+			b(i) = linear_term_failure(0, i);
+		}
+
+		// printf("b_failure  = \n");
+		// printAlglib(b);
+	}
+	else
+	{
+		linear_term = a_err.T() * W * N;
+		for (size_t i = 0; i < _null_size; i++)
+		{
+			b(i) = linear_term_failure(0, i);
+		}
+		// printf("b  = \n");
+		// printAlglib(b);
+	}
+
+	// printf("nullsize = %d\n", _null_size);
+
+	alglib::real_1d_array x0;
+	double x0_arr[_null_size];
+	for (int i = 0; i < _null_size; i++)
+	{
+		if(!_last_lambda_init)
+		{
+			x0_arr[i] = 1;
+		}
+		else
+		{
+			x0_arr[i] = _last_lambda_sol(i);
+		}
+
+		// x0_arr[i] = actuator_opt(i); // TODO: find the best starting values
+
+	}
+	x0.setcontent(_null_size, x0_arr);
+	alglib::real_1d_array s;
+	s.setlength(_null_size);
+	for (size_t i = 0; i < _null_size; i++)
+	{
+		s(i) = 12.8;
+	}
+
+	alglib::real_2d_array C;
+	alglib::integer_1d_array ct;
+	_create_constraints(C,ct);
+	// printf("null:\n");
+	// _nullspace_failed.print();
+	// printf("constraints2:\n");
+	// printAlglib(C);
+	// printf("linear:\n");
+	// printAlglib(b);
+	// printf("x0:\n");
+	// printAlglib(x0);
+	alglib::real_1d_array x;
+	alglib::minqpstate state;
+	alglib_impl::ae_state _state;
+	alglib_impl::ae_state_init(&_state);
+	alglib_impl::ae_state _lc_state;
+	alglib_impl::ae_state_init(&_lc_state);
+	alglib::minqpreport rep;
+
+	alglib::minqpcreate(_null_size, state);
+	alglib_impl::minqpsetquadraticterm(const_cast<alglib_impl::minqpstate*>(state.c_ptr()), const_cast<alglib_impl::ae_matrix*>(a.c_ptr()), isupper, &_state);
+	alglib::minqpsetstartingpoint(state, x0);
+
+	// alglib::minqpsetlc(state, C, ct);
+	alglib_impl::minqpsetlc(const_cast<alglib_impl::minqpstate*>(state.c_ptr()), const_cast<alglib_impl::ae_matrix*>(C.c_ptr()), const_cast<alglib_impl::ae_vector*>(ct.c_ptr()), C.rows(), &_lc_state);
+
+	// Set scale: currectly set to 1/sqrt(diag(a)) TODO: uncomment the commented one and find the best scaling factors
+	// alglib::minqpsetscale(state, s);
+	alglib::minqpsetscaleautodiag(state);
+
+	alglib::minqpsetalgobleic(state, 0.2, 0.2, 0.2, 0);
+	// alglib::minqpsetalgoquickqp(state, 0.001, 0.001, 0.001, 0, true);
+	alglib::minqpoptimize(state);
+	alglib::minqpresults(state, x, rep);
+
+	if(rep.inneriterationscount > mx) mx = rep.inneriterationscount;
+	printf("solution_err_cost_func = \n");
+	printAlglib(x);
+	printf("opt report 2: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
 	printf("max iter = %d\n", mx);
 	_lambda_sol = x;
 
