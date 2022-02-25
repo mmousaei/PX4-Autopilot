@@ -69,6 +69,7 @@ private:
 	int print_cnt = 0;
 	alglib::real_1d_array _lambda_sol;
 	alglib::real_1d_array _last_lambda_sol;
+	matrix::Vector<float, NUM_AXES> _control_allocated_without_opt;
 	bool _last_lambda_init = false;
 	int mx = -100;
 	void _optimize_sample();

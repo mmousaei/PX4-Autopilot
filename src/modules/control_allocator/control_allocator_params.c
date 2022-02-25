@@ -312,3 +312,10 @@ PARAM_DEFINE_FLOAT(CA_ACT14_MAX, 0.0);
  * @group Control Allocation
  */
 PARAM_DEFINE_FLOAT(CA_ACT15_MAX, 0.0);
+
+/**
+ * Maximum value for actuator 15
+ *
+ * @group Control Allocation
+ */
+PARAM_DEFINE_INT32(CSV_START, 0);

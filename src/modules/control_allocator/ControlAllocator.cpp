@@ -134,6 +134,7 @@ ControlAllocator::parameters_updated()
 	actuator_max(13) = _param_ca_act13_max.get();
 	actuator_max(14) = _param_ca_act14_max.get();
 	actuator_max(15) = _param_ca_act15_max.get();
+	csv_start	 = _param_csv_start.get();
 	_control_allocation->setActuatorMax(actuator_max);
 	param_vtol_failure = _param_vtol_failure.get();
 	param_vtol_failure_val = _param_vtol_failure_val.get();
