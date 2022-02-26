@@ -55,3 +55,25 @@ def plot_control_al_vs_no_opt(control_sp, control_al, control_al_no):
 	plt.gca().legend(loc='best', ncol=2)
 	# plt.legend(["$C_{sp}^0$", "$C_{sp}^1$", "$C_{sp}^2$", "$C_{sp}^3$", "$C_{sp}^4$", "$C_{sp}^5$", "$C_{sp}^0$", "$C_{sp}^1$", "$C_{sp}^2$", "$C_{sp}^3$", "$C_{sp}^4$", "$C_{sp}^5$", "$C_{sp}^0$", "$C_{sp}^1$", "$C_{sp}^2$", "$C_{sp}^3$", "$C_{sp}^4$", "$C_{sp}^5$"], prop={'size':12}, loc=1)
 	plt.show()
+
+def plot_norm_c_sp_vs_norm_c_all(norm_c_sp, norm_c_al):
+	sz = len(norm_c_sp[0])
+	c = np.array(norm_c_sp)
+	c_al = np.array(norm_c_al)
+	# sns.set_context("paper")
+	# sns.set(font="Verdana")
+	t = np.linspace(1, len(norm_c_sp), len(norm_c_sp))
+	# sns.set_style({'font.family':'serif', 'font.serif':'Times New Roman'})
+	print(c_al[:, 0])
+	
+	# with sns.axes_style("whitegrid"):
+	d = 50
+	plt.plot(c[520-d:520+d, 0], label="$||C_{"+"sp}||_2^2")
+	# plt.plot(c_al[520-d:520+d, 0], label="$||C_{"+"alloc}||_2^2")
+
+	plt.ylim(-10,15)
+	ax = plt.title("$Test$ $Plot$", size=12,fontweight="bold")
+	# # plt.gca().legend(loc='best', ncol=2)
+	# # plt.legend(["$C_{sp}^0$", "$C_{sp}^1$", "$C_{sp}^2$", "$C_{sp}^3$", "$C_{sp}^4$", "$C_{sp}^5$", "$C_{sp}^0$", "$C_{sp}^1$", "$C_{sp}^2$", "$C_{sp}^3$", "$C_{sp}^4$", "$C_{sp}^5$", "$C_{sp}^0$", "$C_{sp}^1$", "$C_{sp}^2$", "$C_{sp}^3$", "$C_{sp}^4$", "$C_{sp}^5$"], prop={'size':12}, loc=1)
+	
+	plt.show()

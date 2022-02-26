@@ -139,6 +139,7 @@ ControlAllocator::parameters_updated()
 	param_vtol_failure = _param_vtol_failure.get();
 	param_vtol_failure_val = _param_vtol_failure_val.get();
 	_control_allocation->getActuatorFailure(param_vtol_failure, param_vtol_failure_val);
+	_control_allocation->setCsvStart(csv_start);
 
 }
 

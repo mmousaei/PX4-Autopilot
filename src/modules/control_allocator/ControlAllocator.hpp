@@ -162,6 +162,7 @@ private:
 
 	int param_vtol_failure;
 	float param_vtol_failure_val;
+	int csv_start;
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::CA_AIRFRAME>) _param_ca_airframe,
@@ -200,7 +201,7 @@ private:
 		(ParamFloat<px4::params::CA_ACT13_MAX>) _param_ca_act13_max,
 		(ParamFloat<px4::params::CA_ACT14_MAX>) _param_ca_act14_max,
 		(ParamFloat<px4::params::CA_ACT15_MAX>) _param_ca_act15_max,
-		(ParamInt<px4::params::CSV_START>) _param_csv_start,
+		(ParamInt<px4::params::VTOL_CSV_START>) _param_csv_start,
 		(ParamInt<px4::params::VTOL_FAILURE>) _param_vtol_failure,   ///< failure to an actuator
 		(ParamFloat<px4::params::VTOL_FAILURE_VAL>) _param_vtol_failure_val   ///< failure to an actuator
 	)

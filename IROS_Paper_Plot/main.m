@@ -1,0 +1,43 @@
+close all
+clear all
+clc
+
+file = csvread('test_data/motor_failure_1/motor_failure_1.csv', 2, 0);
+
+control_sp = file(:,1:6);
+actuator_sp = file(:, 7:18);
+airspeed = file(:, 19);
+roll = file(:, 20);
+pitch = file(:, 21);
+control_allocated = file(:, 22:27);
+control_allocated_no_opt = file(:, 28:33);
+norm_control_sp = file(:, 34);
+norm_control_allocated = file(:, 35);
+norm_control_allocated_no_opt = file(:, 36);
+actuator_sp_no_opt = file(:, 37:48);
+yaw = file(:, 49);
+fail_id = file(:, 50);
+fail_val = file(:, 51);
+% actuator_sp_original = file(:, 52:63);
+
+fig_num = 0;
+%% plot norm c_sp vs c_alloc
+fig_num = fig_num + 1;
+figure(fig_num)
+plot(norm_control_sp)
+hold on
+plot(norm_control_allocated)
+plot(norm_control_allocated_no_opt)
+
+%% plot acts
+fig_num = fig_num + 1;
+figure(fig_num)
+s = ["motor", "tilt", "control surface"];
+for i = 1:12
+    subplot(3, 4, i)
+    plot(actuator_sp(:,i))
+    hold on
+    plot(actuator_sp_no_opt(:,i))
+    legend('sp','no opt')
+    title(s(ceil(i/4)) + int2str(rem(i, 4)))
+end

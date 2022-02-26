@@ -275,6 +275,9 @@ public:
 		_actuator_failure_val = failure_val;
 		if(_actuator_failure_id != 0) failed = true;
 	}
+	void setCsvStart(int start) {
+		_csv_start = start;
+	}
 
 	airspeed_validated_s 				_airspeed_validated{};
 	vtol_vehicle_status_s _vtol_vehicle_status {};
@@ -290,6 +293,8 @@ protected:
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_min; 	//< Minimum actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_max; 	//< Maximum actuator values
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_sp;  	//< Actuator setpoint
+	matrix::Vector<float, NUM_ACTUATORS> _actoator_sp_original;  	//< Actuator setpoint
+	matrix::Vector<float, NUM_ACTUATORS> _actuator_sp_no_opt;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS> _actuator_sp_uk;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_last;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_AXES> _control_sp;   		//< Control setpoint
@@ -314,6 +319,7 @@ protected:
 	int _null_size;
 	int _actuator_failure_id;	//failed actuator id given from QGC
 	float _actuator_failure_val;	//failed actuator value given from QGC
+	int _csv_start;			//csv start value given from QGC
 
 	// float known_val[NUM_KNOWN];
 

@@ -128,6 +128,7 @@ void Tiltrotor::update_vtol_state()
 	_vtol_vehicle_status->tiltrotor_tilt = _tilt_control;
 	_vtol_vehicle_status->roll = _v_att_sp->roll_body;
 	_vtol_vehicle_status->pitch = _v_att_sp->pitch_body;
+	_vtol_vehicle_status->yaw = _v_att_sp->yaw_body;
 
 	if (_vtol_vehicle_status->vtol_transition_failsafe) {
 		// Failsafe event, switch to MC mode immediately

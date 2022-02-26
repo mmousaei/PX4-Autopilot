@@ -71,6 +71,8 @@ ControlAllocationPseudoInverse::allocate()
 	// _actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
 
 	_actuator_sp = _actuator_trim + _mix * (_control_sp - _control_trim);
+	_actuator_sp_no_opt = _actuator_sp;
+	_actoator_sp_original = _actuator_sp;
 
 	// Clip
 	// clipActuatorSetpoint(_actuator_sp);
@@ -100,7 +102,7 @@ ControlAllocationPseudoInverse::allocate()
 
 		_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
 		_actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
-
+		_actuator_sp_no_opt = _actuator_sp;
 		_control_allocated =  _effectiveness * _actuator_sp;
 		_control_unallocated = (_control_sp - _control_allocated);
 		// printf("unallocated control:\n");
@@ -185,11 +187,14 @@ ControlAllocationPseudoInverse::allocate()
 	// printf("min:\n");
 	// _actuator_min.T().print();
 	// Save into csv TODO: add a QGC bool param to control save or not save
-	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
-	_airspeed_validated_sub.update(&_airspeed_validated);
-	cFile.open("myFile.csv", std::ios_base::app);
-	cFile << std::endl << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<<", "<<double(_control_allocated(0))<<", "<<double(_control_allocated(1))<<", "<<double(_control_allocated(2))<<", "<<double(_control_allocated(3))<<", "<<double(_control_allocated(4))<<", "<<double(_control_allocated(5))<<", "<<double(_control_allocated_without_opt(0))<<", "<<double(_control_allocated_without_opt(1))<<", "<<double(_control_allocated_without_opt(2))<<", "<<double(_control_allocated_without_opt(3))<<", "<<double(_control_allocated_without_opt(4))<<", "<<double(_control_allocated_without_opt(5))<< std::endl;
-	cFile.close();
+	if (_csv_start)
+	{
+		_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
+		_airspeed_validated_sub.update(&_airspeed_validated);
+		cFile.open("motor_failure_1.csv", std::ios_base::app);
+		cFile << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<<", "<<double(_control_allocated(0))<<", "<<double(_control_allocated(1))<<", "<<double(_control_allocated(2))<<", "<<double(_control_allocated(3))<<", "<<double(_control_allocated(4))<<", "<<double(_control_allocated(5))<<", "<<double(_control_allocated_without_opt(0))<<", "<<double(_control_allocated_without_opt(1))<<", "<<double(_control_allocated_without_opt(2))<<", "<<double(_control_allocated_without_opt(3))<<", "<<double(_control_allocated_without_opt(4))<<", "<<double(_control_allocated_without_opt(5))<<", "<<double(_control_sp.norm())<<", "<<double(_control_allocated.norm())<<", "<<double(_control_allocated_without_opt.norm())<< ", "<< double(_actuator_sp_no_opt(0))<< ", "<< double(_actuator_sp_no_opt(1))<< ", "<< double(_actuator_sp_no_opt(2))<< ", "<< double(_actuator_sp_no_opt(3))<< ", "<< double(_actuator_sp_no_opt(4))<< ", "<< double(_actuator_sp_no_opt(5))<< ", "<< double(_actuator_sp_no_opt(6))<< ", "<< double(_actuator_sp_no_opt(7))<< ", "<< double(_actuator_sp_no_opt(8))<< ", "<< double(_actuator_sp_no_opt(9))<< ", "<< double(_actuator_sp_no_opt(10))<< ", "<< double(_actuator_sp_no_opt(11))<<", "<<double(_vtol_vehicle_status.yaw)<<", "<<int(_actuator_failure_id)<<", "<<double(_actuator_failure_val)<< ", " << double(_actoator_sp_original(0))<< ", "<< double(_actoator_sp_original(1))<< ", "<< double(_actoator_sp_original(2))<< ", "<< double(_actoator_sp_original(3))<< ", "<< double(_actoator_sp_original(4))<< ", "<< double(_actoator_sp_original(5))<< ", "<< double(_actoator_sp_original(6))<< ", "<< double(_actoator_sp_original(7))<< ", "<< double(_actoator_sp_original(8))<< ", "<< double(_actoator_sp_original(9))<< ", "<< double(_actoator_sp_original(10))<< ", "<< double(_actoator_sp_original(11))<< std::endl;
+		cFile.close();
+	}
 
 }
 
