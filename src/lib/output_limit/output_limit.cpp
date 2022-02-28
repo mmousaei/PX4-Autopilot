@@ -53,6 +53,7 @@ void output_limit_calc(const bool armed, const bool pre_armed, const unsigned nu
 		       const float *output, uint16_t *effective_output, output_limit_t *limit)
 {
 
+
 	/* first evaluate state changes */
 	switch (limit->state) {
 	case OUTPUT_LIMIT_STATE_INIT:
@@ -133,6 +134,7 @@ void output_limit_calc(const bool armed, const bool pre_armed, const unsigned nu
 		break;
 
 	case OUTPUT_LIMIT_STATE_RAMP: {
+		printf("case ramp\n\n\n");
 			hrt_abstime diff = hrt_elapsed_time(&limit->time_armed);
 
 			progress = diff * PROGRESS_INT_SCALING / RAMP_TIME_US;
@@ -175,7 +177,6 @@ void output_limit_calc(const bool armed, const bool pre_armed, const unsigned nu
 				if (reverse_mask & (1 << i)) {
 					control_value = -1.0f * control_value;
 				}
-
 				effective_output[i] = control_value * (max_output[i] - ramp_min_output) / 2 + (max_output[i] + ramp_min_output) / 2;
 
 				/* last line of defense against invalid inputs */
@@ -206,9 +207,10 @@ void output_limit_calc(const bool armed, const bool pre_armed, const unsigned nu
 			}
 
 			effective_output[i] = control_value * (max_output[i] - min_output[i]) / 2 + (max_output[i] + min_output[i]) / 2;
-
+			// printf("eff %d = %d, control val = %f, max = %d, min = %d\n", i, effective_output[i], control_value, max_output[i], min_output[i]);
 			/* last line of defense against invalid inputs */
 			if (effective_output[i] < min_output[i]) {
+
 				effective_output[i] = min_output[i];
 
 			} else if (effective_output[i] > max_output[i]) {

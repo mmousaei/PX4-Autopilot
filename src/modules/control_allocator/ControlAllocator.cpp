@@ -483,14 +483,13 @@ ControlAllocator::publish_legacy_actuator_controls()
 	matrix::Vector<float, NUM_ACTUATORS> actuator_sp_normalized = _control_allocation->normalizeActuatorSetpoint(
 				actuator_sp);
 
-
 	for (size_t i = 0; i < 8; i++) {
 		actuator_controls_4.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i))) ? actuator_sp_normalized(i) : 0.0f;
 		actuator_controls_5.control[i] = (PX4_ISFINITE(actuator_sp_normalized(i + 8))) ? actuator_sp_normalized(i + 8) : 0.0f;
 		// if (_flag_trans){
 		// 	//actuator_controls_4.control[4] = 0.35f;
 		// 	//PX4_INFO("Allocated actuator group 4 %zu = %d.%.6d", i, (int)actuator_sp(i), (int)((actuator_sp(i)-(int)actuator_sp(i))*1000000));
-		// 	PX4_INFO("Group 4 %zu = %d.%.6d normalized", i, (int)actuator_controls_4.control[i], (int)((actuator_controls_4.control[i]-(int)actuator_controls_4.control[i])*1000000));
+			// PX4_ERR("Group 4 %zu = %d.%.6d normalized", i, (int)actuator_controls_4.control[i], (int)((actuator_controls_4.control[i]-(int)actuator_controls_4.control[i])*1000000));
 		// 	PX4_INFO("Group 5 %zu = %d.%.6d normalized", i, (int)actuator_controls_5.control[i], (int)((actuator_controls_5.control[i]-(int)actuator_controls_5.control[i])*1000000));
 		// }
 

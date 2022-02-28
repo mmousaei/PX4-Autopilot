@@ -236,10 +236,11 @@ const
 			actuator_normalized(i) = -1.0f + 2.0f * (_actuator_trim(i) - _actuator_min(i)) / (_actuator_max(i) - _actuator_min(i));
 		}
 	// Mohammad (change normalized )
-		if( i >= 4 && i < 8)
-		{
-			actuator_normalized(i) = -1 + 2*actuator(i);
-		}
+		// if( i >= 4 && i < 8)
+		// {
+		// 	actuator_normalized(i) = -1 + 2*actuator(i);
+		// 	// printf("i = %d, val = %f\n", i, actuator_normalized(i));
+		// }
 	}
 
 	return actuator_normalized;

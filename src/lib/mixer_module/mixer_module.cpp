@@ -267,6 +267,7 @@ void MixingOutput::updateOutputSlewrateSimplemixer()
 
 unsigned MixingOutput::motorTest()
 {
+
 	test_motor_s test_motor;
 	bool had_update = false;
 
@@ -288,7 +289,7 @@ unsigned MixingOutput::motorTest()
 
 		if (in_test_mode) {
 			int idx = test_motor.motor_number;
-
+			PX4_ERR("in test mode");
 			if (idx < MAX_ACTUATORS) {
 				if (test_motor.value < 0.f) {
 					_current_output_value[reorderedMotorIndex(idx)] = _disarmed_value[idx];
@@ -329,6 +330,7 @@ unsigned MixingOutput::motorTest()
 
 bool MixingOutput::update()
 {
+
 	if (!_mixers) {
 		handleCommands();
 		// do nothing until we have a valid mixer
@@ -403,6 +405,7 @@ bool MixingOutput::update()
 	const unsigned mixed_num_outputs = _mixers->mix(outputs, _max_num_outputs);
 
 	/* the output limit call takes care of out of band errors, NaN and constrains */
+
 	output_limit_calc(_throttle_armed, armNoThrottle(), mixed_num_outputs, _reverse_output_mask,
 			  _disarmed_value, _min_value, _max_value, outputs, _current_output_value, &_output_limit);
 
@@ -430,6 +433,7 @@ bool MixingOutput::update()
 	/* now return the outputs to the driver */
 	if (_interface.updateOutputs(stop_motors, _current_output_value, mixed_num_outputs, n_updates)) {
 		actuator_outputs_s actuator_outputs{};
+
 		setAndPublishActuatorOutputs(mixed_num_outputs, actuator_outputs);
 
 		publishMixerStatus(actuator_outputs);
@@ -457,7 +461,7 @@ MixingOutput::setAndPublishActuatorOutputs(unsigned num_outputs, actuator_output
 		{
 			actuator_outputs.output[i] = _current_output_value[i];
 			if(i < 4) actuator_outputs.output[i] = int(1100 * param_vtol_failure_val + 900);
-			else if (i >= 4 && i < 8) actuator_outputs.output[i] = int(1000 * param_vtol_failure_val + 1000);
+			else if (i >= 4 && i < 8) actuator_outputs.output[i] = int(1100 * param_vtol_failure_val + 900);
 			else if (i >= 8) actuator_outputs.output[i] = int(500 * param_vtol_failure_val + 1500);
 		}
 		// else

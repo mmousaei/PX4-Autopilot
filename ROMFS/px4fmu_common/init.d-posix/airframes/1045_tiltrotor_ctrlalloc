@@ -20,13 +20,18 @@ param set-default FW_L1_PERIOD 12
 param set-default FW_MAN_P_MAX 30
 param set-default FW_PR_FF 0.2
 param set-default FW_PR_I 0.4
-param set-default FW_PR_P 0.9
+param set-default FW_PR_P 0.15
+param set-default FW_YR_FF 8.3
+param set-default FW_YR_I 0.5
+param set-default FW_YR_P 0.2
 param set-default FW_PSP_OFF 2
 param set-default FW_P_LIM_MAX 32
 param set-default FW_P_LIM_MIN -15
-param set-default FW_RR_FF 0.1
-param set-default FW_RR_P 0.3
-param set-default FW_THR_CRUISE 0.25
+param set-default FW_R_LIM 40
+param set-default FW_RR_FF 1.0
+param set-default FW_RR_P 0.1
+param set-default FW_RR_I 0.2
+param set-default FW_THR_CRUISE 0.3
 param set-default FW_THR_MAX 0.6
 param set-default FW_THR_MIN 0.05
 param set-default FW_T_ALT_TC 2
@@ -54,18 +59,29 @@ param set-default MPC_XY_VEL_P_ACC 3
 param set-default MPC_XY_VEL_I_ACC 4
 param set-default MPC_XY_VEL_D_ACC 0.1
 param set-default MPC_Z_VEL_MAX_DN 1.5
+# motor failure to 0.3
 param set AVC_Y_P 20.0
 param set AVC_Y_K 2.0
 param set AVC_X_P 20.0
 param set AVC_X_K 2.0
-param set AVC_Z_K 5.0
+param set AVC_Z_K 3.0
 param set AVC_Z_P 20.0
 param set AVC_Y_I 0.6
-param set AVC_X_I 0.3
-param set AVC_Z_I 0.3
+param set AVC_X_I 0.6
+param set AVC_Z_I 0.05
+# # motor failure to 0.5 MC
+# param set AVC_Y_P 20.0
+# param set AVC_Y_K 2.0
+# param set AVC_X_P 20.0
+# param set AVC_X_K 2.0
+# param set AVC_Z_K 4.0
+# param set AVC_Z_P 18.0
+# param set AVC_Y_I 0.3
+# param set AVC_X_I 0.3
+# param set AVC_Z_I 0.05
+
 #param set AVC_Y_D 0.45
 #param set AVC_X_D 30.0
-
 param set-default NAV_ACC_RAD 5
 param set-default NAV_LOITER_RAD 80
 
@@ -118,6 +134,10 @@ param set-default CA_ACT9_MAX 1.0
 param set-default CA_ACT10_MIN -1.0
 
 param set-default CA_ACT10_MAX 1.0
+# rudder
+param set-default CA_ACT11_MIN -1.0
+
+param set-default CA_ACT11_MAX 1.0
 
 param set-default CA_MC_R0_PX 0.1515
 param set-default CA_MC_R0_PY 0.245

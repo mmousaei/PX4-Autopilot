@@ -2,7 +2,11 @@ close all
 clear all
 clc
 
-file = csvread('test_data/motor_failure_1/motor_failure_1.csv', 2, 0);
+% file = csvread('test_data/motor_failure_1/motor_failure_1.csv', 2, 0);
+% file = csvread('test_data/tuning_tests/tuning_tests_with_sub.csv', 2, 0);
+% file = csvread('test_data/tilt_failure_1/tilt_failure_1.csv', 2, 0);
+file = csvread('test_data/motor_failure_fw_1/motor_failure_fw_1.csv', 2, 0);
+file = csvread('test_data/motor_failure_fw_1/motor_failure_fw_1.csv', 2, 0);
 
 control_sp = file(:,1:6);
 actuator_sp = file(:, 7:18);
@@ -18,7 +22,7 @@ actuator_sp_no_opt = file(:, 37:48);
 yaw = file(:, 49);
 fail_id = file(:, 50);
 fail_val = file(:, 51);
-% actuator_sp_original = file(:, 52:63);
+actuator_sp_original = file(:, 52:63);
 
 fig_num = 0;
 %% plot norm c_sp vs c_alloc
@@ -28,7 +32,7 @@ plot(norm_control_sp)
 hold on
 plot(norm_control_allocated)
 plot(norm_control_allocated_no_opt)
-
+legend('sp', 'alloc','alloc no opt')
 %% plot acts
 fig_num = fig_num + 1;
 figure(fig_num)
@@ -38,6 +42,12 @@ for i = 1:12
     plot(actuator_sp(:,i))
     hold on
     plot(actuator_sp_no_opt(:,i))
-    legend('sp','no opt')
-    title(s(rem(i, 3)+1))
+%     plot(actuator_sp_original(:,i))
+%     if(ceil(i/4) == 2)
+%         ylim([0.9, 1.1])
+%     end
+    legend('opt','no opt','original')
+    ylim([-1.0, 1.0])
+%     xlim([3000, 5000])
+    title(s(ceil(i/4)) + ' '+int2str(rem(i-1, 4)))
 end

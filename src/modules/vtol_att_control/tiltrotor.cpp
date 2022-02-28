@@ -452,7 +452,6 @@ void Tiltrotor::update_transition_state()
 			_v_att_sp->thrust_body[2] = -_fw_virtual_att_sp->thrust_body[0];
 		}
 	}
-
 	const Quatf q_sp(Eulerf(_v_att_sp->roll_body, _v_att_sp->pitch_body, _v_att_sp->yaw_body));
 	q_sp.copyTo(_v_att_sp->q_d);
 
@@ -472,6 +471,8 @@ void Tiltrotor::waiting_on_tecs()
 */
 void Tiltrotor::fill_actuator_outputs()
 {
+
+
 	auto &mc_in = _actuators_mc_in->control;
 	auto &fw_in = _actuators_fw_in->control;
 
@@ -513,6 +514,7 @@ void Tiltrotor::fill_actuator_outputs()
 	_actuators_out_1->timestamp_sample = _actuators_fw_in->timestamp_sample;
 
 	_actuators_out_0->timestamp = _actuators_out_1->timestamp = hrt_absolute_time();
+
 }
 
 /*

@@ -270,10 +270,35 @@ public:
 	virtual void updateParameters() {}
 
 	int numConfiguredActuators() const { return _num_actuators; }
+	// void getActuatorFailure(int failure_id, float failure_val) {
+	// 	_actuator_failure_id = failure_id;
+	// 	_actuator_failure_val = failure_val;
+	// 	if(_actuator_failure_id != 0) failed = true;
+	// }
 	void getActuatorFailure(int failure_id, float failure_val) {
+
 		_actuator_failure_id = failure_id;
 		_actuator_failure_val = failure_val;
+		printf("cnt = %d\n", _failure_cnt);
 		if(_actuator_failure_id != 0) failed = true;
+		// if(_failure_cnt == 1000)
+		// {
+		// 	_actuator_failure_id = csv_start;
+
+		// }
+		// if(_failure_cnt == 1500)
+		// {
+		// 	_actuator_failure_val -= 0.1;
+		// }
+		// if(_failure_cnt == 2000)
+		// {
+		// 	_actuator_failure_val -= 0.1;
+		// }
+		// if(_failure_cnt == 3000)
+		// {
+		// 	_actuator_failure_id = 0;
+		// 	_csv_start = 0;
+		// }
 	}
 	void setCsvStart(int start) {
 		_csv_start = start;
@@ -299,6 +324,7 @@ protected:
 	matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_last;  	//< Actuator setpoint
 	matrix::Vector<float, NUM_AXES> _control_sp;   		//< Control setpoint
 	matrix::Vector<float, NUM_AXES> _control_allocated;  	//< Allocated control
+	matrix::Vector<float, NUM_AXES> _aero_wrench;  	//< _weight_force
 	matrix::Vector<float, NUM_AXES> _control_trim;  	//< Control at trim actuator values
 	// ADDED
 	matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS> _effectiveness_unknown;  //< Effectiveness matrix
@@ -320,6 +346,7 @@ protected:
 	int _actuator_failure_id;	//failed actuator id given from QGC
 	float _actuator_failure_val;	//failed actuator value given from QGC
 	int _csv_start;			//csv start value given from QGC
+	int _failure_cnt = 0;
 
 	// float known_val[NUM_KNOWN];
 

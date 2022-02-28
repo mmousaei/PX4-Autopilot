@@ -92,10 +92,10 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	if(!_vtol_vehicle_status.vtol_in_rw_mode)
 	{
 		// printf("not rw mode!\n");
-		_trim(0) = 0.f;
-		_trim(1) = 0.f;
-		_trim(2) = 0.f;
-		_trim(3) = 0.f;
+		_trim(0) = 0.3f;
+		_trim(1) = 0.3f;
+		_trim(2) = 0.3f;
+		_trim(3) = 0.3f;
 	}
 	else
 	{
@@ -130,11 +130,11 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	}
 
 	// printf("alan injaaaaaaaaaaaaaaam  =  %f,  %f\n", double(_airspeed_validated.calibrated_airspeed_m_s), double(_vtol_vehicle_status.tiltrotor_tilt));
-
-	float trim4_m = tilt*1.570796f;
-	float trim5_m = tilt*1.570796f;
-	float trim6_m = tilt*1.570796f;
-	float trim7_m = tilt*1.570796f;
+	printf("tilt = %f\n", tilt);
+	float trim4_m = _trim(4);
+	float trim5_m = _trim(5);
+	float trim6_m = _trim(6);
+	float trim7_m = _trim(7);
 
 	// // Effectiveness
 	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
@@ -177,7 +177,11 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float c_bar = 0.2f;
 	float Cla = 0.11730*0.1;
 	float Cme = 0.55604*0.1*0.5*0.5*0.5;
-	float Cnr = 0.08810f;
+	float Cnr = 0.08810*0.1*0.5*0.5*0.5;
+	// float Cla = 0.11730;
+    	// float Cme = 0.55604;
+    	// float Cnr = 0.08810;
+	// float Cnr = 0.0f;
 
 	// 			w_0							  w_1							w_2								w_3								theta_0									  theta_1										theta_2												theta_3								   delta_a left		   delta_a right	   delta_e			   delta_r
 	const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
