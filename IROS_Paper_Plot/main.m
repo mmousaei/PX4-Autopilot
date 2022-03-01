@@ -6,7 +6,7 @@ clc
 % file = csvread('test_data/tuning_tests/tuning_tests_with_sub.csv', 2, 0);
 % file = csvread('test_data/tilt_failure_1/tilt_failure_1.csv', 2, 0);
 % file = csvread('test_data/motor_failure_fw_1/motor_failure_fw_1.csv', 2, 0);
-file = csvread('/home/mohammad/workspace/px4_tilt_test/PX4-Autopilot/build/px4_sitl_default/tmp/rootfs/new_motor.csv', 2, 0);
+file = csvread('/home/mohammad/workspace/px4_tilt_test/PX4-Autopilot/build/px4_sitl_default/tmp/rootfs/full_tilt_fail.csv', 2, 0);
 % file = csvread('test_data/final_tests/motor_fail_to_0-3/with_opt.csv', 2, 0);
 % file = csvread('test_data/final_tests/no_knowledge_is_better!/opt_motor.csv', 2, 0);
 % file = csvread('test_data/final_tests/no_knowledge_is_better!/pid_motor.csv', 2, 0);
@@ -47,7 +47,7 @@ for i = 1:12
     subplot(3, 4, i)
     plot(actuator_sp(:,i))
     hold on
-    plot(actuator_sp_no_opt(:,i))
+%     plot(actuator_sp_no_opt(:,i))
 %     plot(actuator_sp_original(:,i))
 %     if(ceil(i/4) == 2)
 %         ylim([0.9, 1.1])

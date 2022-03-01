@@ -92,10 +92,10 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	if(!_vtol_vehicle_status.vtol_in_rw_mode)
 	{
 		// printf("not rw mode!\n");
-		_trim(0) = 0.3f;
-		_trim(1) = 0.3f;
-		_trim(2) = 0.3f;
-		_trim(3) = 0.3f;
+		_trim(0) = 0.0f;
+		_trim(1) = 0.0f;
+		_trim(2) = 0.0f;
+		_trim(3) = 0.0f;
 	}
 	else
 	{
@@ -136,6 +136,17 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float trim6_m = _trim(6);
 	float trim7_m = _trim(7);
 
+	// if(_failure_id == 11)
+	// {
+	// 	_trim(10) = _failure_val;
+	// }
+	// else
+	// {
+	// 	_trim(10) = -0.2;
+	// }
+
+
+
 	// // Effectiveness
 	// const float tiltrotor_vtol[NUM_AXES][NUM_ACTUATORS] = {
 	// 	{-0.5f * cosf(_trim(4)),  0.5f * cosf(_trim(5)),  0.5f * cosf(_trim(6)), -0.5f * cosf(_trim(7)), 0.5f * _trim(0) *sinf(_trim(4)), -0.5f * _trim(1) *sinf(_trim(5)), -0.5f * _trim(2) *sinf(_trim(6)), 0.5f * _trim(3) *sinf(_trim(7)), -0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f},
@@ -169,7 +180,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float Py_3 = 0.245f;
 	float Pz_3 = 0.0f;
 	float Ct = 5.0f;
-	float Km = 0.05f;
+	float Km = 0.07f; //0.06
 	float ro = 1.225f;
 	float q_bar = ro * airspeed * airspeed / 2;
 	float S = 0.4266f;
@@ -177,7 +188,7 @@ ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix(matrix::Matrix<float,
 	float c_bar = 0.2f;
 	float Cla = 0.11730*0.1;
 	float Cme = 0.55604*0.1*0.5*0.5*0.5;
-	float Cnr = 0.08810*0.1*0.5*0.5*0.5;
+	float Cnr = 0.08810*0.1*0.5*0.5;
 	// float Cla = 0.11730;
     	// float Cme = 0.55604;
     	// float Cnr = 0.08810;

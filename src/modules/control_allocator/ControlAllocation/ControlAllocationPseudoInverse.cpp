@@ -68,19 +68,23 @@ ControlAllocationPseudoInverse::allocate()
 	// _optimize_sample();
 	_vtol_vehicle_status_sub.update(&_vtol_vehicle_status);
 	_airspeed_validated_sub.update(&_airspeed_validated);
+	float tilt_degree = _vtol_vehicle_status.tiltrotor_tilt / 2.0f * 180.0f;
 	float airspeed = _airspeed_validated.calibrated_airspeed_m_s;
 	float ro = 1.225f;
 	float q_bar = ro * airspeed * airspeed / 2;
 	float S = 0.4266f;
-	float alpha = 5 * 3.1415 / 180;
-	float Cl = 0.13 + 0.11 * alpha;
+	float alpha = 1 * 3.1415 / 180;
+	float Cl = 0.11 + 0.11 * alpha;
 	float Cd = 0.01 + 0.2 * alpha * alpha;
+	// float b = 2.0f;
+	// float Cme = 0.55604*0.1*0.5*0.5*0.5;
 	_aero_wrench(5) = q_bar * S * Cl;
 	_aero_wrench(3) = q_bar * S * Cd;
-	printf("lift:\n");
-	_aero_wrench.T().print();
-	printf("c sp:\n");
-	_control_sp.T().print();
+	// _aero_wrench(1) = q_bar * S * b * Cme * 0.2;
+	// printf("lift:\n");
+	// _aero_wrench.T().print();
+	// printf("c sp:\n");
+	// _control_sp.T().print();
 	_control_sp += _aero_wrench;
 
 	// Allocate
@@ -101,126 +105,169 @@ ControlAllocationPseudoInverse::allocate()
 
 
 	_control_allocated_without_opt = _control_allocated;
-	// if (_actuator_failure_id) {
-	// 	float act_known[NUM_ACTUATORS];
-	// 	int cnt = 0;
-	// 	for(int i = 0; i < NUM_ACTUATORS; ++i) {
-	// 		if (i == known_ind[cnt]) {
-	// 			act_known[i] = _actuator_trim_known(i);
-	// 			cnt++;
-	// 		}
-	// 		else{
-	// 			act_known[i] = 0.0f;
-	// 		}
-	// 	}
-	// 	_actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(act_known);
-	// 	_control_known_sp = _effectiveness_known * _actuator_known_sp;
 
 
-	// 	_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
-	// 	_actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
-	// 	// clipActuatorSetpoint(_actuator_sp);
-	// 	_actuator_sp_no_opt = _actuator_sp;
-	// 	_actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
-	// 	_control_allocated =  _effectiveness * _actuator_sp;
-	// 	_control_unallocated = (_control_sp - _control_allocated);
-	// 	// printf("unallocated control:\n");
-	// 	// _control_unallocated.T().print();
 
-	// 	matrix::Vector<float, NUM_ACTUATORS - 5> _actuator_opt;
-	// 	float act_opt[NUM_ACTUATORS - 5];
-	// 	float act_err[NUM_ACTUATORS - 4];
-	// 	for (int i = 0; i < NUM_ACTUATORS - 5; i++)
-	// 	{
-	// 		act_err[i] = _actuator_sp(i);
-	// 		if(i < _actuator_failure_id)
-	// 		{
-	// 			act_opt[i] = _actuator_sp(i);
-	// 			if(i < 4)
-	// 			{
-	// 				act_opt[i] = _actuator_sp(i) - 0.3;
-	// 			}
-	// 			else if(i < 8 &&  i >= 4)
-	// 			{
-	// 				act_opt[i] = _actuator_sp(i) - 1.57;
-	// 			}
-
-	// 		}
-	// 		else
-	// 		{
-	// 			act_opt[i] = _actuator_sp(i+1);
-	// 			if(i < 4)
-	// 			{
-	// 				act_opt[i] = _actuator_sp(i+1) - 0.3;
-	// 			}
-	// 			else if(i < 8 &&  i >= 4)
-	// 			{
-	// 				act_opt[i] = _actuator_sp(i) - 1.57;
-	// 			}
-	// 		}
-
-	// 	}
-	// 	_actuator_opt = matrix::Vector<float, NUM_ACTUATORS - 5> (act_opt);
-	// 	matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_err = matrix::Vector<float, NUM_ACTUATORS - 4> (act_err);
-	// 	_actuator_err -= _actuator_last;
-	// 	matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint;
-	// 	linear_constraint = _actuator_opt.T() * _nullspace_failed * 2;
-	// 	// int termination_type = _optimize_allocation_simple_cost(linear_constraint, _actuator_opt);
-	// 	int termination_type = _optimize_allocation_err_cost(_actuator_err);
-	// 	// printf("optimizing here!\n");
-	// 	bool isNan_opt = false;
-	// 	for (size_t i = 0; i < _null_size; i++)
-	// 	{
-	// 		if(isnan(_lambda_sol(i))) isNan_opt = true;
-	// 	}
-	// 	if(!isNan_opt)
-	// 	{
-	// 		_last_lambda_sol = _lambda_sol;
-	// 		_last_lambda_init = true;
-	// 	}
-	// 	matrix::Vector<float, NUM_ACTUATORS - 4> _lambda;
-	// 	int i;
-	// 	for (i = 0; i < NUM_ACTUATORS - 4; i++)
-	// 	{
-	// 		if(i < _null_size)
-	// 		{
-	// 			_lambda(i) = _lambda_sol(i);
-	// 		}
-	// 		else
-	// 		{
-	// 			_lambda(i) = 0.0f;
-	// 		}
-
-	// 	}
-	// 	matrix::Vector<float, NUM_ACTUATORS> _actuator_optimized;
-	// 	for (i = 0; i < NUM_ACTUATORS; i++)
-	// 	{
-	// 		if(i < NUM_ACTUATORS - 4)
-	// 		{
-	// 			if(i < (_actuator_failure_id-1))
-	// 			{
-	// 				_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 5>(_nullspace_failed * _lambda)(i);
-	// 			}
-	// 			else if (i == (_actuator_failure_id-1))
-	// 			{
-	// 				_actuator_optimized(i) = 0.f;
-	// 			}
-	// 			else
-	// 			{
-	// 				_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 5>(_nullspace_failed * _lambda)(i-1);
-	// 			}
-
-
-	// 		}
-	// 	}
-	// 	printf("_actuator_optimized:\n");
-	// 	_actuator_optimized.T().print();
-	// 	if(!isNan_opt && termination_type > 0 && termination_type < 5)
-	// 	{
-	// 		_actuator_sp +=_actuator_optimized;
-	// 	}
-
+	// matrix::Matrix<float, 12, 1> act;
+	// for (size_t i = 0; i < 12; i++)
+	// {
+	// 	act(i, 0) = _actuator_sp(i);
 	// }
+	// matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint;
+	// linear_constraint = act.T() * _nullspace * 2;
+	// int termination_type = _optimize_allocation_simple_cost(linear_constraint);
+
+///////////////////////////////////////// FAILURE ////////////////////////////////////////////////
+	if (_actuator_failure_id) {
+		float act_known[NUM_ACTUATORS];
+		int cnt = 0;
+		for(int i = 0; i < NUM_ACTUATORS; ++i) {
+			if (i == known_ind[cnt]) {
+				act_known[i] = _actuator_trim_known(i);
+				cnt++;
+			}
+			else{
+				act_known[i] = 0.0f;
+			}
+		}
+		_actuator_known_sp = matrix::Vector<float, NUM_ACTUATORS>(act_known);
+		_control_known_sp = _effectiveness_known * _actuator_known_sp;
+
+
+		_actuator_unknown_sp = _actuator_trim_unknown + _mix_unknown * ( _control_sp -  _control_known_sp - _control_trim_unknown);
+		_actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
+		// clipActuatorSetpoint(_actuator_sp);
+		_actuator_sp_no_opt = _actuator_sp;
+		_actuator_sp = _actuator_unknown_sp + (_actuator_known_sp);
+		_control_allocated =  _effectiveness * _actuator_sp;
+		_control_unallocated = (_control_sp - _control_allocated);
+		// printf("unallocated control:\n");
+		// _control_unallocated.T().print();
+
+		matrix::Vector<float, NUM_ACTUATORS - 5> _actuator_opt;
+		float act_opt[NUM_ACTUATORS - 5];
+		float act_err[NUM_ACTUATORS - 4];
+		for (int i = 0; i < NUM_ACTUATORS - 5; i++)
+		{
+			act_err[i] = _actuator_sp(i);
+			if(i < _actuator_failure_id)
+			{
+				act_opt[i] = _actuator_sp(i);
+				if(i < 4)
+				{
+					act_opt[i] = _actuator_sp(i) - 0.3;
+				}
+				else if(i < 8 &&  i >= 4)
+				{
+					act_opt[i] = _actuator_sp(i) - 1.57;
+				}
+
+			}
+			else
+			{
+				act_opt[i] = _actuator_sp(i+1);
+				if(i < 4)
+				{
+					act_opt[i] = _actuator_sp(i+1) - 0.3;
+				}
+				else if(i < 8 &&  i >= 4)
+				{
+					act_opt[i] = _actuator_sp(i) - 1.57;
+				}
+			}
+
+		}
+		_actuator_opt = matrix::Vector<float, NUM_ACTUATORS - 5> (act_opt);
+		matrix::Vector<float, NUM_ACTUATORS - 4> _actuator_err = matrix::Vector<float, NUM_ACTUATORS - 4> (act_err);
+		_actuator_err -= _actuator_last;
+		matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint;
+		linear_constraint = _actuator_opt.T() * _nullspace_failed * 2;
+		// int termination_type = _optimize_allocation_simple_cost(linear_constraint);
+		int termination_type = _optimize_allocation_err_cost(_actuator_err);
+		// printf("optimizing here!\n");
+		bool isNan_opt = false;
+		for (size_t i = 0; i < _null_size; i++)
+		{
+			if(isnan(_lambda_sol(i))) isNan_opt = true;
+		}
+		if(!isNan_opt)
+		{
+			_last_lambda_sol = _lambda_sol;
+			_last_lambda_init = true;
+		}
+		matrix::Vector<float, NUM_ACTUATORS - 4> _lambda;
+		int i;
+		for (i = 0; i < NUM_ACTUATORS - 4; i++)
+		{
+			if(i < _null_size)
+			{
+				_lambda(i) = _lambda_sol(i);
+			}
+			else
+			{
+				_lambda(i) = 0.0f;
+			}
+
+		}
+		matrix::Vector<float, NUM_ACTUATORS> _actuator_optimized;
+		for (i = 0; i < NUM_ACTUATORS; i++)
+		{
+			if(i < NUM_ACTUATORS - 4)
+			{
+				if(i < (_actuator_failure_id-1))
+				{
+					_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 5>(_nullspace_failed * _lambda)(i);
+				}
+				else if (i == (_actuator_failure_id-1))
+				{
+					_actuator_optimized(i) = 0.f;
+				}
+				else
+				{
+					_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 5>(_nullspace_failed * _lambda)(i-1);
+				}
+
+
+			}
+		}
+		if(!isNan_opt && termination_type > 0 && termination_type < 5)
+		{
+			printf("_actuator_optimized:\n");
+			_actuator_optimized.T().print();
+			_actuator_sp +=_actuator_optimized;
+		}
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// matrix::Vector<float, NUM_ACTUATORS - 4> _lambda;
+	// int i;
+	// for (i = 0; i < NUM_ACTUATORS - 4; i++)
+	// {
+	// 	_lambda(i) = _lambda_sol(i);
+	// }
+	// matrix::Vector<float, NUM_ACTUATORS> _actuator_optimized;
+	// for (i = 0; i < NUM_ACTUATORS - 4; i++)
+	// {
+	// 	_actuator_optimized(i) = matrix::Vector<float, NUM_ACTUATORS - 4>(_nullspace * _lambda)(i);
+	// }
+	// // if(termination_type > 0 && termination_type < 5)
+	// // {
+	// // 	printf("_actuator_optimized no failure:\n");
+	// // 	_actuator_optimized.T().print();
+	// // 	_actuator_sp +=_actuator_optimized;
+	// // }
 	// // clipActuatorSetpoint(_actuator_sp);
 	// _control_allocated =  _effectiveness * _actuator_sp;
 	// _control_unallocated = (_control_sp - _control_allocated);
@@ -229,30 +276,33 @@ ControlAllocationPseudoInverse::allocate()
 	// // printf("_act_sp\n");
 	// // _actuator_sp.T().print();
 
-	// // printf("max:\n");
-	// // _actuator_max.T().print();
-	// // printf("min:\n");
-	// // _actuator_min.T().print();
-	// // Save into csv TODO: add a QGC bool param to control save or not save
+	// printf("max:\n");
+	// _actuator_max.T().print();
+	// printf("min:\n");
+	// _actuator_min.T().print();
+	// Save into csv TODO: add a QGC bool param to control save or not save
 
-	// if (_csv_start)
-	// {
-	// 	// _failure_cnt++;
-	// 	// getActuatorFailure(_actuator_failure_id, _actuator_failure_val, _csv_start);
-	// 	// printf("%d, %f, %d, %d\n", _actuator_failure_id, _actuator_failure_val, _csv_start, _failure_cnt);
-	// 	cFile.open("new_motor.csv", std::ios_base::app);
-	// 	cFile << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<<", "<<double(_control_allocated(0))<<", "<<double(_control_allocated(1))<<", "<<double(_control_allocated(2))<<", "<<double(_control_allocated(3))<<", "<<double(_control_allocated(4))<<", "<<double(_control_allocated(5))<<", "<<double(_control_allocated_without_opt(0))<<", "<<double(_control_allocated_without_opt(1))<<", "<<double(_control_allocated_without_opt(2))<<", "<<double(_control_allocated_without_opt(3))<<", "<<double(_control_allocated_without_opt(4))<<", "<<double(_control_allocated_without_opt(5))<<", "<<double(_control_sp.norm())<<", "<<double(_control_allocated.norm())<<", "<<double(_control_allocated_without_opt.norm())<< ", "<< double(_actuator_sp_no_opt(0))<< ", "<< double(_actuator_sp_no_opt(1))<< ", "<< double(_actuator_sp_no_opt(2))<< ", "<< double(_actuator_sp_no_opt(3))<< ", "<< double(_actuator_sp_no_opt(4))<< ", "<< double(_actuator_sp_no_opt(5))<< ", "<< double(_actuator_sp_no_opt(6))<< ", "<< double(_actuator_sp_no_opt(7))<< ", "<< double(_actuator_sp_no_opt(8))<< ", "<< double(_actuator_sp_no_opt(9))<< ", "<< double(_actuator_sp_no_opt(10))<< ", "<< double(_actuator_sp_no_opt(11))<<", "<<double(_vtol_vehicle_status.yaw)<<", "<<int(_actuator_failure_id)<<", "<<double(_actuator_failure_val)<< ", " << double(_actoator_sp_original(0))<< ", "<< double(_actoator_sp_original(1))<< ", "<< double(_actoator_sp_original(2))<< ", "<< double(_actoator_sp_original(3))<< ", "<< double(_actoator_sp_original(4))<< ", "<< double(_actoator_sp_original(5))<< ", "<< double(_actoator_sp_original(6))<< ", "<< double(_actoator_sp_original(7))<< ", "<< double(_actoator_sp_original(8))<< ", "<< double(_actoator_sp_original(9))<< ", "<< double(_actoator_sp_original(10))<< ", "<< double(_actoator_sp_original(11))<< std::endl;
-	// 	cFile.close();
-	// }
+	if (_csv_start)
+	{
+		// _failure_cnt++;
+		// getActuatorFailure(_actuator_failure_id, _actuator_failure_val, _csv_start);
+		// printf("%d, %f, %d, %d\n", _actuator_failure_id, _actuator_failure_val, _csv_start, _failure_cnt);
+		cFile.open("full_tilt_fail.csv", std::ios_base::app);
+		cFile << double(_control_sp(0)) << ", "<< double(_control_sp(1)) << ", "<< double(_control_sp(2)) << ", "<< double(_control_sp(3)) << ", "<< double(_control_sp(4)) << ", "<< double(_control_sp(5))<< ", " << double(_actuator_sp(0))<< ", "<< double(_actuator_sp(1))<< ", "<< double(_actuator_sp(2))<< ", "<< double(_actuator_sp(3))<< ", "<< double(_actuator_sp(4))<< ", "<< double(_actuator_sp(5))<< ", "<< double(_actuator_sp(6))<< ", "<< double(_actuator_sp(7))<< ", "<< double(_actuator_sp(8))<< ", "<< double(_actuator_sp(9))<< ", "<< double(_actuator_sp(10))<< ", "<< double(_actuator_sp(11))<< ", " <<double(_airspeed_validated.calibrated_airspeed_m_s)<<", "<<double(_vtol_vehicle_status.roll)<<", "<<double(_vtol_vehicle_status.pitch)<<", "<<double(_control_allocated(0))<<", "<<double(_control_allocated(1))<<", "<<double(_control_allocated(2))<<", "<<double(_control_allocated(3))<<", "<<double(_control_allocated(4))<<", "<<double(_control_allocated(5))<<", "<<double(_control_allocated_without_opt(0))<<", "<<double(_control_allocated_without_opt(1))<<", "<<double(_control_allocated_without_opt(2))<<", "<<double(_control_allocated_without_opt(3))<<", "<<double(_control_allocated_without_opt(4))<<", "<<double(_control_allocated_without_opt(5))<<", "<<double(_control_sp.norm())<<", "<<double(_control_allocated.norm())<<", "<<double(_control_allocated_without_opt.norm())<< ", "<< double(_actuator_sp_no_opt(0))<< ", "<< double(_actuator_sp_no_opt(1))<< ", "<< double(_actuator_sp_no_opt(2))<< ", "<< double(_actuator_sp_no_opt(3))<< ", "<< double(_actuator_sp_no_opt(4))<< ", "<< double(_actuator_sp_no_opt(5))<< ", "<< double(_actuator_sp_no_opt(6))<< ", "<< double(_actuator_sp_no_opt(7))<< ", "<< double(_actuator_sp_no_opt(8))<< ", "<< double(_actuator_sp_no_opt(9))<< ", "<< double(_actuator_sp_no_opt(10))<< ", "<< double(_actuator_sp_no_opt(11))<<", "<<double(_vtol_vehicle_status.yaw)<<", "<<int(_actuator_failure_id)<<", "<<double(_actuator_failure_val)<< ", " << double(_actoator_sp_original(0))<< ", "<< double(_actoator_sp_original(1))<< ", "<< double(_actoator_sp_original(2))<< ", "<< double(_actoator_sp_original(3))<< ", "<< double(_actoator_sp_original(4))<< ", "<< double(_actoator_sp_original(5))<< ", "<< double(_actoator_sp_original(6))<< ", "<< double(_actoator_sp_original(7))<< ", "<< double(_actoator_sp_original(8))<< ", "<< double(_actoator_sp_original(9))<< ", "<< double(_actoator_sp_original(10))<< ", "<< double(_actoator_sp_original(11))<< std::endl;
+		cFile.close();
+	}
 
-	// for (size_t i = 0; i < 12; i++)
-	// {
-	// 	_actuator_last(i) = _actuator_sp(i);
-	// }
-	_actuator_sp =  _actuator_trim + _mix * (_control_sp - _control_trim);
+	for (size_t i = 0; i < 12; i++)
+	{
+		_actuator_last(i) = _actuator_sp(i);
+	}
+	// _actuator_sp =  _actuator_trim + _mix * (_control_sp - _control_trim);
 	// clipActuatorSetpoint(_actuator_sp);
+	// printf("tilt: %f\n", tilt_degree);
+
 	for (size_t i = 4; i < 8; i++)
 	{
+		printf("act %d = %f\n", i, _actuator_sp(i) * 180.0 / 3.14);
 		_actuator_sp(i) /= 1.570796;
 	}
 
@@ -406,7 +456,7 @@ void ControlAllocationPseudoInverse::_create_constraints(alglib::real_2d_array &
 
 	}
 }
-int ControlAllocationPseudoInverse::_optimize_allocation_simple_cost(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 5> actuator_opt)
+int ControlAllocationPseudoInverse::_optimize_allocation_simple_cost(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint)
 {
 
 	alglib::real_2d_array a;
@@ -478,10 +528,10 @@ int ControlAllocationPseudoInverse::_optimize_allocation_simple_cost(matrix::Mat
 	alglib::minqpresults(state, x, rep);
 
 	if(rep.inneriterationscount > mx) mx = rep.inneriterationscount;
-	// printf("solution = \n");
-	// printAlglib(x);
-	// printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
-	// printf("max iter = %d\n", mx);
+	printf("solution = \n");
+	printAlglib(x);
+	printf("opt report: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+	printf("max iter = %d\n", mx);
 	_lambda_sol = x;
 
 	return rep.terminationtype;
@@ -719,10 +769,10 @@ int ControlAllocationPseudoInverse::_optimize_allocation_err_cost(matrix::Vector
 	alglib::minqpresults(state, x, rep);
 
 	if(rep.inneriterationscount > mx) mx = rep.inneriterationscount;
-	// printf("solution_err_cost_func = \n");
-	// printAlglib(x);
-	// printf("opt report 2: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
-	// printf("max iter = %d\n", mx);
+	printf("solution_err_cost_func = \n");
+	printAlglib(x);
+	printf("opt report 2: \ninner cnt: %d\nouter cnt:%d\ntermination type:%d\n", rep.inneriterationscount, rep.outeriterationscount, rep.terminationtype);
+	printf("max iter = %d\n", mx);
 	_lambda_sol = x;
 
 	return rep.terminationtype;

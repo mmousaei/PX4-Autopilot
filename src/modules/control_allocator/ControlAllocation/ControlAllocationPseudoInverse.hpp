@@ -74,7 +74,7 @@ private:
 	int mx = -100;
 	void _optimize_sample();
 	void _create_constraints(alglib::real_2d_array &C, alglib::integer_1d_array &ct);
-	int _optimize_allocation_simple_cost(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint, matrix::Vector<float, NUM_ACTUATORS - 5> actuator_opt);
+	int _optimize_allocation_simple_cost(matrix::Matrix<float, 1,  NUM_ACTUATORS - 4> linear_constraint);
 	int _optimize_allocation_err_cost(matrix::Vector<float, NUM_ACTUATORS - 4> actuator_err);
 
 protected:

@@ -13,9 +13,9 @@ param set-default VM_MASS 1.5
 param set-default MPC_THR_HOVER 0.5
 
 param set-default FW_L1_PERIOD 12
-#param set-default FW_AIRSPD_MAX 60
+param set-default FW_AIRSPD_MAX 35
 #param set-default FW_AIRSPD_MIN 14
-#param set-default FW_AIRSPD_TRIM 20
+param set-default FW_AIRSPD_TRIM 20
 
 param set-default FW_MAN_P_MAX 30
 param set-default FW_PR_FF 0.2
@@ -59,7 +59,17 @@ param set-default MPC_XY_VEL_P_ACC 3
 param set-default MPC_XY_VEL_I_ACC 4
 param set-default MPC_XY_VEL_D_ACC 0.1
 param set-default MPC_Z_VEL_MAX_DN 1.5
-# motor failure to 0.3
+# # FULL motor failure (LAST SUCCESS)
+# param set AVC_Y_P 20.0
+# param set AVC_Y_K 2.0
+# param set AVC_X_P 20.0
+# param set AVC_X_K 2.0
+# param set AVC_Z_K 3.0
+# param set AVC_Z_P 20.0
+# param set AVC_Y_I 0.6
+# param set AVC_X_I 0.6
+# param set AVC_Z_I 0.05
+# FULL motor failure (CURRENT TRIAL)
 param set AVC_Y_P 20.0
 param set AVC_Y_K 2.0
 param set AVC_X_P 20.0
@@ -68,7 +78,7 @@ param set AVC_Z_K 3.0
 param set AVC_Z_P 20.0
 param set AVC_Y_I 0.6
 param set AVC_X_I 0.6
-param set AVC_Z_I 0.05
+param set AVC_Z_I 0.1
 # # motor failure to 0.5 MC
 # param set AVC_Y_P 20.0
 # param set AVC_Y_K 2.0
